@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../components/CustomBottomNavBar.dart'; // Make sure the path is correct
+import '../components/CustomBottomNavBar.dart'; 
 
 class EditProfileScreen extends StatefulWidget {
   @override

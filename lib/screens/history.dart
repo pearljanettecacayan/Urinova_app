@@ -3,29 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class HistoryScreen extends StatelessWidget {
   final List<Map<String, String>> historyItems = [
-    {
-      'date': 'July 25, 2025',
-      'hydration': 'Normal',
-      'utiRisk': 'Low',
-    },
-    {
-      'date': 'July 18, 2025',
-      'hydration': 'Dehydrated',
-      'utiRisk': 'Moderate',
-    },
-    {
-      'date': 'July 10, 2025',
-      'hydration': 'Normal',
-      'utiRisk': 'Low',
-    },
+    {'date': 'July 25, 2025', 'hydration': 'Normal', 'utiRisk': 'Low'},
+    {'date': 'July 18, 2025', 'hydration': 'Dehydrated', 'utiRisk': 'Moderate'},
+    {'date': 'July 10, 2025', 'hydration': 'Normal', 'utiRisk': 'Low'},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-         backgroundColor: Colors.teal, // <--- TEAL COLOR
-         iconTheme: const IconThemeData(color: Colors.white), // <-- WHITE BACK ARROW
+        backgroundColor: Colors.teal, // <--- TEAL COLOR
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // <-- WHITE BACK ARROW
         title: Text('History', style: GoogleFonts.poppins(color: Colors.white)),
       ),
       body: Padding(
@@ -42,7 +32,7 @@ class HistoryScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = historyItems[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8,),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
                     child: ListTile(
                       leading: Icon(Icons.history, color: Colors.teal),
                       title: Text(

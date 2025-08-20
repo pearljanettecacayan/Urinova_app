@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 
@@ -11,11 +12,35 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<String> articleTitles = [
-    "Understanding Urine Color: What It Means",
-    "UTI Symptoms You Shouldn't Ignore",
-    "Tips to Stay Hydrated Every Day",
-    "Early Detection of Dehydration in Children",
+  final List<Map<String, String>> articles = [
+    {
+      "title": "Understanding Urine Color: What It Means",
+      "content":
+          "Urine color can indicate your hydration and health. Light yellow usually means well-hydrated, dark yellow can suggest dehydration, while red or cloudy urine may signal possible infection or other health issues.",
+    // "image": "assets/images/urine_color.jpg"
+    },
+    {
+      "title": "UTI Symptoms You Shouldn't Ignore",
+      "content":
+          "Common UTI symptoms include frequent urination, burning sensation when peeing, cloudy urine, and lower abdominal pain. If symptoms persist, consult a doctor immediately.",
+    },
+    {
+      "title": "Tips to Stay Hydrated Every Day",
+      "content":
+          "Drink at least 8 glasses of water daily. Include fruits and vegetables in your diet, and avoid excessive caffeine or alcohol which may cause dehydration.",
+    },
+    {
+      "title": "Early Detection of Dehydration in Children",
+      "content":
+          "Watch out for signs like dry mouth, no tears when crying, sunken eyes, and decreased urination. Early hydration is key to preventing serious complications.",
+    },
+  ];
+
+  // ✅ List of image assets for carousel
+  final List<String> carouselImages = [
+    "assets/images/urine_img.png",
+    "assets/images/urine.png",
+    "assets/images/urine_img.png",
   ];
 
   void _onItemTapped(int index) {
@@ -44,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       drawer: AppDrawer(),
       appBar: AppBar(
-        backgroundColor: Colors.teal, // <--- TEAL COLOR
+        backgroundColor: Colors.teal,
         title: Text(
           'Home',
           style: GoogleFonts.poppins(
@@ -52,13 +77,32 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.white,
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.white), // drawer icon color
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ✅ Carousel Slider at the top
+            CarouselSlider(
+              options: CarouselOptions(
+                height: 200.0,
+                autoPlay: true,
+                enlargeCenterPage: true,
+              ),
+              items: carouselImages.map((imagePath) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                );
+              }).toList(),
+            ),
+
             const SizedBox(height: 24),
             Text(
               "Health Articles",
@@ -69,19 +113,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            ...articleTitles.map((title) {
+            ...articles.map((article) {
               return Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
                 elevation: 3,
-                child: ListTile(
+                child: ExpansionTile(
                   leading: Icon(Icons.article, color: Colors.teal),
-                  title: Text(title, style: GoogleFonts.poppins()),
-                  trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // TODO: Add article navigation
-                  },
+                  title: Text(article["title"]!, style: GoogleFonts.poppins()),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        article["content"]!,
+                        style: GoogleFonts.poppins(fontSize: 14),
+                      ),
+                    ),
+                  ],
                 ),
               );
             }).toList(),

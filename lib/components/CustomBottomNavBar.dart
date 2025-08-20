@@ -15,7 +15,7 @@ class CustomBottomNavBar extends StatelessWidget {
     double iconSize = 28;
     final items = [
       Icons.home,
-      Icons.list_alt,
+      Icons.integration_instructions_rounded,
       Icons.camera_alt,
       Icons.person,
     ];
