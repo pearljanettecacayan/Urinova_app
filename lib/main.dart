@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart'; // import firebase_core
+
 import 'screens/index.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
@@ -14,7 +16,9 @@ import 'screens/settings.dart';
 import 'screens/home.dart';
 import 'screens/symptoms.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // initialize Firebase
   runApp(UrinalysisApp());
 }
 
@@ -50,7 +54,7 @@ class UrinalysisApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) =>IndexScreen(),
+        '/': (context) => IndexScreen(),
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/introduction': (context) => IntroductionScreen(),

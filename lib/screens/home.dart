@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
       "title": "Understanding Urine Color: What It Means",
       "content":
           "Urine color can indicate your hydration and health. Light yellow usually means well-hydrated, dark yellow can suggest dehydration, while red or cloudy urine may signal possible infection or other health issues.",
-    // "image": "assets/images/urine_color.jpg"
+      // "image": "assets/images/urine_color.jpg"
     },
     {
       "title": "UTI Symptoms You Shouldn't Ignore",
