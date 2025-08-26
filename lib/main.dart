@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart'; // import firebase_core
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // 👈 import FirebaseAuth
+import 'firebase_options.dart';
 
 import 'screens/index.dart';
 import 'screens/login.dart';
@@ -18,7 +20,9 @@ import 'screens/symptoms.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(UrinalysisApp());
 }
 
@@ -42,19 +46,21 @@ class UrinalysisApp extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            textStyle: TextStyle(fontWeight: FontWeight.bold),
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           fillColor: Colors.white,
           filled: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
-      initialRoute: '/',
+      // ✅ Check kung naka-login ba ang user
+      home: FirebaseAuth.instance.currentUser == null
+          ? IndexScreen() // not logged in → go to index/login
+          : HomeScreen(), // logged in → go to home
       routes: {
-        '/': (context) => IndexScreen(),
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/introduction': (context) => IntroductionScreen(),

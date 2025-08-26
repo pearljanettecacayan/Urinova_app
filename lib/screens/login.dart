@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -14,8 +15,60 @@ class _LoginScreenState extends State<LoginScreen>
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  void _login(BuildContext context) {
-    Navigator.pushNamed(context, '/home');
+  bool _loading = false;
+
+  Future<void> _login(BuildContext context) async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showAlert("Please enter email and password");
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      // ✅ Authenticate with Firebase
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // ✅ If login success -> navigate to Home
+      Navigator.pushReplacementNamed(context, '/home');
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'user-not-found') {
+        message = "No account found for this email.";
+      } else if (e.code == 'wrong-password') {
+        message = "Incorrect password.";
+      } else {
+        message = e.message ?? "Login failed.";
+      }
+      _showAlert(message);
+    } catch (e) {
+      _showAlert("An error occurred: $e");
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  void _showAlert(String message) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Login Failed", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        content: Text(message, style: GoogleFonts.poppins()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("OK", style: GoogleFonts.poppins(color: Colors.teal)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -43,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ Apply same background gradient as IndexScreen
+      // ✅ Same background gradient
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -143,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen>
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () => _login(context),
+                          onPressed: _loading ? null : () => _login(context),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -151,13 +204,15 @@ class _LoginScreenState extends State<LoginScreen>
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: Text(
-                            'Login',
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: _loading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                                  'Login',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -166,8 +221,7 @@ class _LoginScreenState extends State<LoginScreen>
                             Navigator.pushNamed(context, '/register'),
                         child: Text(
                           'No account yet? Register here',
-                          style:
-                              GoogleFonts.poppins(color: Colors.teal[700]),
+                          style: GoogleFonts.poppins(color: Colors.teal[700]),
                         ),
                       ),
                     ],

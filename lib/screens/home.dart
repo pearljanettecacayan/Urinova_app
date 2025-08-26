@@ -71,12 +71,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         title: Text(
-          'Home',
+          'Urinova Analysis',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
+        centerTitle: true, // ✅ Para ma-center ang title
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(

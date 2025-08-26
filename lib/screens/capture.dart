@@ -42,6 +42,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
           'Capture Sample',
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white),
         ),
+        centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white), // drawer icon color
       ),
       body: LayoutBuilder(

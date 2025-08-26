@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class AppDrawer extends StatefulWidget {
-  @override
-  _AppDrawerState createState() => _AppDrawerState();
-}
 
-class _AppDrawerState extends State<AppDrawer> {
-  String selectedRoute = '';
-
+class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -33,42 +28,34 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
           ),
           ListTile(
+            leading: Icon(Icons.person),
+            title: Text('Profile'),
+            onTap: () => Navigator.pushNamed(context, '/profile'),
+          ),
+          ListTile(
             leading: Icon(Icons.history),
             title: Text('History'),
-            selected: selectedRoute == '/history',
-            selectedTileColor: Colors.teal.withOpacity(0.2),
-            onTap: () {
-              setState(() {
-                selectedRoute = '/history';
-              });
-              Navigator.pushNamed(context, '/history');
-            },
+            onTap: () => Navigator.pushNamed(context, '/history'),
           ),
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Settings'),
-            selected: selectedRoute == '/settings',
-            selectedTileColor: Colors.teal.withOpacity(0.2),
-            onTap: () {
-              setState(() {
-                selectedRoute = '/settings';
-              });
-              Navigator.pushNamed(context, '/settings');
-            },
+            onTap: () => Navigator.pushNamed(context, '/settings'),
           ),
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Log Out'),
-            selected: selectedRoute == '/logout',
-            selectedTileColor: Colors.teal.withOpacity(0.2),
-            onTap: () {
-              setState(() {
-                selectedRoute = '/logout';
-              });
+            onTap: () async {
               Navigator.pop(context); // close drawer
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+
+              // ✅ Sign out from Firebase
+              await FirebaseAuth.instance.signOut();
+
+              // ✅ Navigate to login screen
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
           ),
+
         ],
       ),
     );
