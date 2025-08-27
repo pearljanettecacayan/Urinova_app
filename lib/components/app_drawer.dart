@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -28,11 +27,6 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Profile'),
-            onTap: () => Navigator.pushNamed(context, '/profile'),
-          ),
-          ListTile(
             leading: Icon(Icons.history),
             title: Text('History'),
             onTap: () => Navigator.pushNamed(context, '/history'),
@@ -52,10 +46,13 @@ class AppDrawer extends StatelessWidget {
               await FirebaseAuth.instance.signOut();
 
               // ✅ Navigate to login screen
-              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              );
             },
           ),
-
         ],
       ),
     );

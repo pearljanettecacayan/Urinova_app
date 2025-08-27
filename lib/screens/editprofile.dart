@@ -28,8 +28,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
-    final doc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
 
     if (doc.exists) {
       final data = doc.data()!;
@@ -63,9 +65,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'phone': phone,
       });
 
-      _showDialog("Saved!", "Your profile has been updated.", onOk: () {
-        Navigator.pop(context); // ✅ balik sa Profile screen
-      });
+      _showDialog(
+        "Saved!",
+        "Your profile has been updated.",
+        onOk: () {
+          Navigator.pop(context); // ✅ balik sa Profile screen
+        },
+      );
     } catch (e) {
       _showDialog("Error", "Failed to update profile: $e");
     } finally {
@@ -77,8 +83,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(title,
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title: Text(
+          title,
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
         content: Text(message, style: GoogleFonts.poppins()),
         actions: [
           TextButton(
@@ -117,17 +125,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: Colors.teal,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          'Edit Profile',
+          "Edit Profile",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
-        centerTitle: true, // ✅ Para ma-center ang title
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -145,7 +152,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildLabel("Full Name"),
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(hintText: 'Enter your full name'),
+              decoration: const InputDecoration(
+                hintText: 'Enter your full name',
+              ),
             ),
             const SizedBox(height: 20),
             _buildLabel("Email"),
@@ -167,8 +176,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: phoneController,
               keyboardType: TextInputType.phone,
-              decoration:
-                  const InputDecoration(hintText: 'Enter your phone number'),
+              decoration: const InputDecoration(
+                hintText: 'Enter your phone number',
+              ),
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -184,9 +194,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text("Save Changes",
+                    : Text(
+                        "Save Changes",
                         style: GoogleFonts.poppins(
-                            fontSize: 18, color: Colors.white)),
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -204,8 +218,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style:
-            GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
       ),
     );
   }
