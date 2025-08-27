@@ -10,22 +10,44 @@ class SymptomsScreen extends StatefulWidget {
 
 class _SymptomsScreenState extends State<SymptomsScreen> {
   int _selectedIndex = 2;
+
+  // Symptoms
   final List<String> _symptoms = [
-    "Burning sensation during urination",
-    "Frequent urge to urinate",
+    "Pain or burning during urination",
+    "Frequent urination",
     "Cloudy urine",
     "Strong-smelling urine",
-    "Lower abdominal pain",
-    "Fever or chills"
+    "Abdominal or pelvic pain",
+    "Possible fever",
+    "Thirst",
+    "Dry mouth or lips",
+    "Low urine output",
+    "Dizziness or weakness",
   ];
 
+  // Medication intake questions
+  final List<String> _medicationQuestions = [
+    "Are you currently taking antibiotics?",
+    "Are you taking pain relievers (e.g., paracetamol, ibuprofen)?",
+    "Are you on any medication for urinary problems?",
+    "Are you taking vitamins or supplements?",
+    "Are you taking any herbal medicine for urinary symptoms?",
+  ];
+
+  // Map to hold checkbox state
   final Map<String, bool> _selectedSymptoms = {};
+  final Map<String, bool> _selectedMedications = {};
 
   @override
   void initState() {
     super.initState();
+    // Initialize symptoms map
     for (var symptom in _symptoms) {
       _selectedSymptoms[symptom] = false;
+    }
+    // Initialize medication map
+    for (var question in _medicationQuestions) {
+      _selectedMedications[question] = false;
     }
   }
 
@@ -42,7 +64,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         Navigator.pushReplacementNamed(context, '/instructions');
         break;
       case 2:
-
         break;
       case 3:
         Navigator.pushReplacementNamed(context, '/profile');
@@ -51,24 +72,44 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
   }
 
   void _analyzeSymptoms() {
-    final selected = _selectedSymptoms.entries
+    final selectedSymptoms = _selectedSymptoms.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
         .toList();
 
-    // For now, just show them in a dialog
+    final selectedMedications = _selectedMedications.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+
+    // Show results in a dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Selected Symptoms"),
-        content: Text(selected.isEmpty
-            ? "No symptoms selected."
-            : selected.join("\n")),
+        title: Text("Selected Information"),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Symptoms:",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(selectedSymptoms.isEmpty
+                  ? "No symptoms selected."
+                  : selectedSymptoms.join("\n")),
+              SizedBox(height: 12),
+              Text("Medications:",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(selectedMedications.isEmpty
+                  ? "No medications selected."
+                  : selectedMedications.join("\n")),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text("Close"),
-          )
+          ),
         ],
       ),
     );
@@ -81,7 +122,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         title: Text(
-          'Symptoms',
+          'Symptoms & Medications',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -115,6 +156,8 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
               child: Icon(Icons.image, size: 80, color: Colors.teal),
             ),
             const SizedBox(height: 24),
+
+            // Symptoms Section
             Text(
               "Select Symptoms You Are Experiencing:",
               style: GoogleFonts.poppins(
@@ -126,7 +169,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
             const SizedBox(height: 12),
             ..._symptoms.map((symptom) {
               return CheckboxListTile(
-                value: _selectedSymptoms[symptom],
+                value: _selectedSymptoms[symptom] ?? false,
                 onChanged: (val) {
                   setState(() {
                     _selectedSymptoms[symptom] = val ?? false;
@@ -136,6 +179,32 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 activeColor: Colors.teal,
               );
             }).toList(),
+
+            const SizedBox(height: 24),
+
+            // Medication Section
+            Text(
+              "Medication Intake Questions:",
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal[800],
+              ),
+            ),
+            const SizedBox(height: 12),
+            ..._medicationQuestions.map((question) {
+              return CheckboxListTile(
+                value: _selectedMedications[question] ?? false,
+                onChanged: (val) {
+                  setState(() {
+                    _selectedMedications[question] = val ?? false;
+                  });
+                },
+                title: Text(question, style: GoogleFonts.poppins()),
+                activeColor: Colors.teal,
+              );
+            }).toList(),
+
             const SizedBox(height: 20),
             Center(
               child: ElevatedButton.icon(
@@ -145,7 +214,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 12),
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   textStyle: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
