@@ -16,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _animation;
 
   bool _loading = false;
+  bool _obscurePassword = true; // <-- password visibility state
 
   Future<void> _login(BuildContext context) async {
     final email = emailController.text.trim();
@@ -59,7 +60,8 @@ class _LoginScreenState extends State<LoginScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Login Failed", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title:
+            Text("Login Failed", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
         content: Text(message, style: GoogleFonts.poppins()),
         actions: [
           TextButton(
@@ -180,15 +182,26 @@ class _LoginScreenState extends State<LoginScreen>
                           style: GoogleFonts.poppins(fontSize: 14),
                         ),
                       ),
+                      // <-- Updated password field with eye icon
                       TextField(
                         controller: passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
                           hintText: 'Enter your password',
                           filled: true,
                           fillColor: Colors.white,
-                          border: OutlineInputBorder(
+                          border: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
                           ),
                         ),
                       ),

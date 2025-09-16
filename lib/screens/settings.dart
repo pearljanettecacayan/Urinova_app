@@ -58,30 +58,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           const SizedBox(height: 20),
-          Text(
-            'Language',
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.teal[800],
-            ),
-          ),
-          DropdownButtonFormField<String>(
-            value: _selectedLanguage,
-            items: ['English', 'Cebuano', 'Tagalog']
-                .map(
-                  (lang) => DropdownMenuItem(
-                    value: lang,
-                    child: Text(lang, style: GoogleFonts.poppins()),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedLanguage = value!;
-              });
-            },
-          ),
         ],
       ),
     );

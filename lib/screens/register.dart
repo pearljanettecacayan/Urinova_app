@@ -13,9 +13,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool _loading = false;
+
+  // 👁️ state for toggle password visibility
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -103,8 +108,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity,   // ✅ make container full width
-        height: double.infinity,  // ✅ make container full height
+        width: double.infinity, // ✅ full width
+        height: double.infinity, // ✅ full height
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFa8edea), Color(0xFFfed6e3)],
@@ -146,19 +151,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 32),
                       _buildTextField(
-                          'Full Name', 'Enter your full name', nameController),
+                        'Full Name',
+                        'Enter your full name',
+                        nameController,
+                      ),
                       _buildTextField(
-                          'Email', 'Enter your email', emailController,
-                          keyboardType: TextInputType.emailAddress),
-                      _buildTextField('Phone Number', 'Enter your phone number',
-                          phoneController,
-                          keyboardType: TextInputType.phone),
+                        'Email',
+                        'Enter your email',
+                        emailController,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
                       _buildTextField(
-                          'Password', 'Create a password', passwordController,
-                          obscureText: true),
-                      _buildTextField('Confirm Password',
-                          'Re-enter your password', confirmPasswordController,
-                          obscureText: true),
+                        'Phone Number',
+                        'Enter your phone number',
+                        phoneController,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      _buildTextField(
+                        'Password',
+                        'Create a password',
+                        passwordController,
+                        obscureText: _obscurePassword,
+                        toggleObscure: () {
+                          setState(() =>
+                              _obscurePassword = !_obscurePassword);
+                        },
+                      ),
+                      _buildTextField(
+                        'Confirm Password',
+                        'Re-enter your password',
+                        confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        toggleObscure: () {
+                          setState(() => _obscureConfirmPassword =
+                              !_obscureConfirmPassword);
+                        },
+                      ),
                       const SizedBox(height: 32),
                       SizedBox(
                         width: double.infinity,
@@ -174,17 +202,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: _loading
                               ? const CircularProgressIndicator(
                                   color: Colors.white)
-                              : Text('Create Account',
+                              : Text(
+                                  'Create Account',
                                   style: GoogleFonts.poppins(
-                                      fontSize: 18, color: Colors.white)),
+                                      fontSize: 18, color: Colors.white),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       Center(
                         child: TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text('Back to Login',
-                              style: GoogleFonts.poppins(color: Colors.teal[700])),
+                          child: Text(
+                            'Back to Login',
+                            style:
+                                GoogleFonts.poppins(color: Colors.teal[700]),
+                          ),
                         ),
                       ),
                     ],
@@ -198,9 +231,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(String label, String hint,
-      TextEditingController controller,
-      {bool obscureText = false, TextInputType? keyboardType}) {
+  // 🔑 modified _buildTextField with toggle support
+  Widget _buildTextField(
+    String label,
+    String hint,
+    TextEditingController controller, {
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    VoidCallback? toggleObscure,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -218,6 +257,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
+              suffixIcon: toggleObscure == null
+                  ? null
+                  : IconButton(
+                      icon: Icon(
+                        obscureText
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: toggleObscure,
+                    ),
             ),
           ),
         ],
