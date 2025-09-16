@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
+import 'symptoms.dart'; // import SymptomsScreen
 
 class CaptureScreen extends StatefulWidget {
   @override
@@ -10,6 +13,42 @@ class CaptureScreen extends StatefulWidget {
 
 class _CaptureScreenState extends State<CaptureScreen> {
   int _selectedIndex = 2; // Camera tab
+  File? _image; // store captured or uploaded image
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _captureImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SymptomsScreen(capturedImage: _image),
+        ),
+      );
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SymptomsScreen(capturedImage: _image),
+        ),
+      );
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -37,7 +76,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
       drawer: AppDrawer(),
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        backgroundColor: Colors.teal, // <--- TEAL COLOR
+        backgroundColor: Colors.teal,
         title: Text(
           'Capture Sample',
           style: GoogleFonts.poppins(
@@ -45,16 +84,13 @@ class _CaptureScreenState extends State<CaptureScreen> {
             color: Colors.white,
           ),
         ),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ), // drawer icon color
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bool isWide = constraints.maxWidth > 800;
-          final double contentWidth = isWide
-              ? 500
-              : constraints.maxWidth * 0.85;
+          final double contentWidth =
+              isWide ? 500 : constraints.maxWidth * 0.85;
 
           return Center(
             child: SingleChildScrollView(
@@ -64,7 +100,10 @@ class _CaptureScreenState extends State<CaptureScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.camera_alt, size: 100, color: Colors.grey),
+                    _image == null
+                        ? const Icon(Icons.camera_alt,
+                            size: 100, color: Colors.grey)
+                        : Image.file(_image!, height: 200),
                     const SizedBox(height: 20),
                     Text(
                       'Tap a button below to capture or upload an image of your urine sample.',
@@ -84,8 +123,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                               'Capture',
                               style: GoogleFonts.poppins(fontSize: 16),
                             ),
-                            onPressed: () =>
-                                Navigator.pushNamed(context, '/symptoms'),
+                            onPressed: _captureImage,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.teal,
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -104,14 +142,12 @@ class _CaptureScreenState extends State<CaptureScreen> {
                                 'Upload Image',
                                 style: GoogleFonts.poppins(fontSize: 16),
                               ),
-                              onPressed: () =>
-                                  Navigator.pushNamed(context, '/results'),
+                              onPressed: _uploadImage,
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.teal,
                                 side: const BorderSide(color: Colors.teal),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -130,8 +166,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                             'Upload Image',
                             style: GoogleFonts.poppins(fontSize: 16),
                           ),
-                          onPressed: () =>
-                              Navigator.pushNamed(context, '/results'),
+                          onPressed: _uploadImage,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.teal,
                             side: const BorderSide(color: Colors.teal),

@@ -1,9 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 
 class SymptomsScreen extends StatefulWidget {
+  final File? capturedImage; // optional: urine image gikan sa capture
+
+  SymptomsScreen({this.capturedImage});
+
   @override
   _SymptomsScreenState createState() => _SymptomsScreenState();
 }
@@ -11,7 +16,7 @@ class SymptomsScreen extends StatefulWidget {
 class _SymptomsScreenState extends State<SymptomsScreen> {
   int _selectedIndex = 2;
 
-  // Symptoms
+  // Symptoms list
   final List<String> _symptoms = [
     "Pain or burning during urination",
     "Frequent urination",
@@ -25,7 +30,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     "Dizziness or weakness",
   ];
 
-  // Medication intake questions
+  // Medications list
   final List<String> _medicationQuestions = [
     "Are you currently taking antibiotics?",
     "Are you taking pain relievers (e.g., paracetamol, ibuprofen)?",
@@ -34,27 +39,69 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     "Are you taking any herbal medicine for urinary symptoms?",
   ];
 
-  // Map to hold checkbox state
+  // State maps
   final Map<String, bool> _selectedSymptoms = {};
   final Map<String, bool> _selectedMedications = {};
 
   @override
   void initState() {
     super.initState();
-    // Initialize symptoms map
-    for (var symptom in _symptoms) {
-      _selectedSymptoms[symptom] = false;
+    for (var s in _symptoms) {
+      _selectedSymptoms[s] = false;
     }
-    // Initialize medication map
-    for (var question in _medicationQuestions) {
-      _selectedMedications[question] = false;
+    for (var m in _medicationQuestions) {
+      _selectedMedications[m] = false;
     }
   }
 
+  void _analyzeSymptoms() {
+    final selectedSymptoms = _selectedSymptoms.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
+
+    final selectedMeds = _selectedMedications.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Selected Information"),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Symptoms:",
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(selectedSymptoms.isEmpty
+                  ? "No symptoms selected."
+                  : selectedSymptoms.join("\n")),
+              const SizedBox(height: 12),
+              Text("Medications:",
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(selectedMeds.isEmpty
+                  ? "No medications selected."
+                  : selectedMeds.join("\n")),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // close dialog
+              Navigator.pushReplacementNamed(context, '/results');
+            },
+            child: const Text("Proceed"),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
 
     switch (index) {
       case 0:
@@ -69,50 +116,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         Navigator.pushReplacementNamed(context, '/profile');
         break;
     }
-  }
-
-  void _analyzeSymptoms() {
-    final selectedSymptoms = _selectedSymptoms.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
-
-    final selectedMedications = _selectedMedications.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
-
-    // Show results in a dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Selected Information"),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Symptoms:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(selectedSymptoms.isEmpty
-                  ? "No symptoms selected."
-                  : selectedSymptoms.join("\n")),
-              SizedBox(height: 12),
-              Text("Medications:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text(selectedMedications.isEmpty
-                  ? "No medications selected."
-                  : selectedMedications.join("\n")),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Close"),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -135,6 +138,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Captured Image
             Text(
               "Captured Urine Image",
               style: GoogleFonts.poppins(
@@ -144,7 +148,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            // Placeholder for image
             Container(
               height: 200,
               width: double.infinity,
@@ -153,11 +156,18 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.teal),
               ),
-              child: Icon(Icons.image, size: 80, color: Colors.teal),
+              child: widget.capturedImage != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(widget.capturedImage!,
+                          fit: BoxFit.cover),
+                    )
+                  : const Icon(Icons.image,
+                      size: 80, color: Colors.teal),
             ),
             const SizedBox(height: 24),
 
-            // Symptoms Section
+            // Symptoms choices
             Text(
               "Select Symptoms You Are Experiencing:",
               style: GoogleFonts.poppins(
@@ -179,10 +189,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 activeColor: Colors.teal,
               );
             }).toList(),
-
             const SizedBox(height: 24),
 
-            // Medication Section
+            // Medications choices
             Text(
               "Medication Intake Questions:",
               style: GoogleFonts.poppins(
@@ -204,19 +213,18 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 activeColor: Colors.teal,
               );
             }).toList(),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 20),
+            // Analyze Button at the bottom
             Center(
               child: ElevatedButton.icon(
                 onPressed: _analyzeSymptoms,
-                icon: Icon(Icons.analytics),
-                label: Text("Analyze"),
+                icon: const Icon(Icons.analytics),
+                label: const Text("Analyze"),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   textStyle: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -224,7 +232,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 80), // gap para dili matabunan sa navbar
           ],
         ),
       ),

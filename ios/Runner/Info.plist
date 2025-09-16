@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>NSCameraUsageDescription</key>
+	<string>App needs access to camera for capturing urine sample.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>App needs access to photo library for uploading urine sample.</string>
+
 </dict>
 </plist>
