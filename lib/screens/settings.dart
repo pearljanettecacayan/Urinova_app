@@ -2,22 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SettingsScreen extends StatefulWidget {
+  final bool darkMode;
+  final ValueChanged<bool> onDarkModeChanged;
+
+  const SettingsScreen({
+    Key? key,
+    required this.darkMode,
+    required this.onDarkModeChanged,
+  }) : super(key: key);
+
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
-  bool _darkMode = false;
   String _selectedLanguage = 'English';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal, // <--- TEAL COLOR
-        iconTheme: const IconThemeData(color: Colors.white), // <-- WHITE BACK ARROW
-        title: Text('Settings', style: GoogleFonts.poppins(color: Colors.white)),
+        backgroundColor: Colors.teal,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'Settings',
+          style: GoogleFonts.poppins(color: Colors.white),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -40,15 +51,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           SwitchListTile(
-            title: Text('Dark Mode (Coming Soon)', style: GoogleFonts.poppins()),
-            value: _darkMode,
+            title: Text('Dark Mode', style: GoogleFonts.poppins()),
+            value: widget.darkMode,
             onChanged: (value) {
-              setState(() {
-                _darkMode = value;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Dark mode not available yet.")),
-              );
+              widget.onDarkModeChanged(value); // call function from main.dart
             },
           ),
           const SizedBox(height: 20),
@@ -63,10 +69,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           DropdownButtonFormField<String>(
             value: _selectedLanguage,
             items: ['English', 'Cebuano', 'Tagalog']
-                .map((lang) => DropdownMenuItem(
-                      value: lang,
-                      child: Text(lang, style: GoogleFonts.poppins()),
-                    ))
+                .map(
+                  (lang) => DropdownMenuItem(
+                    value: lang,
+                    child: Text(lang, style: GoogleFonts.poppins()),
+                  ),
+                )
                 .toList(),
             onChanged: (value) {
               setState(() {

@@ -40,10 +40,14 @@ class _CaptureScreenState extends State<CaptureScreen> {
         backgroundColor: Colors.teal, // <--- TEAL COLOR
         title: Text(
           'Capture Sample',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white), // drawer icon color
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ), // drawer icon color
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

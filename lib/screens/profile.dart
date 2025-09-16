@@ -12,12 +12,10 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedIndex = 3; // Profile tab
+  int _selectedIndex = 3;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
 
     switch (index) {
       case 0:
@@ -30,12 +28,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/capture');
         break;
       case 3:
-        // already here
         break;
     }
   }
 
-  /// ✅ Gamiton nato ang StreamBuilder para auto-update kung naay changes sa Firestore
+  /// ✅ Auto-update profile data from Firestore
   Stream<Map<String, dynamic>?> _userDataStream() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return const Stream.empty();
@@ -51,16 +48,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: AppDrawer(),
-    appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: Text(
-          'Profile',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+        title: const Text('Profile', style: TextStyle(color: Colors.white)),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        centerTitle: true, // ✅ Para ma-center ang title
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<Map<String, dynamic>?>(
@@ -80,49 +76,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final fullName = userData['name'] ?? 'No name';
           final email = userData['email'] ?? 'No email';
           final phoneNumber = userData['phone'] ?? 'No phone';
+          final photoUrl = userData['photoUrl'] as String?;
 
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.teal[100],
-                  backgroundImage: userData['profileImage'] != null
-                      ? NetworkImage(userData['profileImage'])
-                      : null,
-                  child: userData['profileImage'] == null
-                      ? Icon(Icons.person, size: 60, color: Colors.teal[700])
-                      : null,
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: Text(
+          return Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  /// ✅ Profile Image (Firebase or Supabase URL works)
+                  CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.teal[100],
+                    backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
+                        ? NetworkImage(
+                            photoUrl,
+                          ) // 👈 works for Supabase public URL
+                        : null,
+                    child: (photoUrl == null || photoUrl.isEmpty)
+                        ? Icon(Icons.person, size: 60, color: Colors.teal[700])
+                        : null,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
                     fullName,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
+                  const SizedBox(height: 8),
+                  Text(
                     email,
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
+                  const SizedBox(height: 8),
+                  Text(
                     phoneNumber,
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
-                ),
-                const SizedBox(height: 32),
-                Center(
-                  child: SizedBox(
+                  const SizedBox(height: 32),
+                  SizedBox(
                     width: 280,
                     child: ElevatedButton(
                       onPressed: () {
@@ -151,8 +146,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
