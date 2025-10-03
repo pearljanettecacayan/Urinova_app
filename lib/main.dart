@@ -18,6 +18,7 @@ import 'screens/history.dart';
 import 'screens/settings.dart';
 import 'screens/home.dart';
 import 'screens/symptoms.dart';
+import 'screens/notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -107,6 +108,7 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
         '/profile': (context) => ProfileScreen(),
         '/editProfile': (context) => EditProfileScreen(),
         '/history': (context) => HistoryScreen(),
+        '/notifications': (context) => const NotificationsScreen(),
         '/settings': (context) =>
             SettingsScreen( // <-- pass dark mode toggle here
               darkMode: _darkMode,

@@ -224,13 +224,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               readOnly: true,
               decoration: const InputDecoration(
                 hintText: 'Your email',
-                filled: true,
-                fillColor: Color(0xFFF0F0F0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
               ),
-            ),
             const SizedBox(height: 20),
             _buildLabel("Phone Number"),
             TextField(

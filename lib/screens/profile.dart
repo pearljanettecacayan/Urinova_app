@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 
@@ -12,7 +11,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedIndex = 3;
+  int _selectedIndex = 4;
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
@@ -28,6 +27,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/capture');
         break;
       case 3:
+        Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
+        break;
+      case 4:
+        Navigator.pushReplacementNamed(context, '/profile');
         break;
     }
   }
@@ -50,7 +53,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       drawer: AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: const Text('Profile', style: TextStyle(color: Colors.white)),
+        title: Text(
+          "Profile",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),

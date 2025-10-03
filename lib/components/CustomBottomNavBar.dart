@@ -12,55 +12,92 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double iconSize = 28;
+    double normalIconSize = 35; // ✅ normal icons size
     final items = [
       Icons.home,
-      Icons.integration_instructions_rounded,
-      Icons.camera_alt,
+      Icons.list_alt,
+      Icons.qr_code_scanner, // ✅ QR icon (special)
+      Icons.notifications,
       Icons.person,
     ];
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.teal,
-        borderRadius: BorderRadius.circular(40),
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (index) {
           final isSelected = selectedIndex == index;
 
-          return GestureDetector(
-            onTap: () => onItemTapped(index),
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 250),
-              padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 16 : 0,
-                vertical: 8,
+          // ✅ Special QR icon (center, naka labaw gyud taas)
+          if (index == 2) {
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onItemTapped(index),
+                child: Transform.translate(
+                  offset: const Offset(0, -20), // gi-angat gyud
+                  child: Container(
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color.fromARGB(
+                        255,
+                        244,
+                        246,
+                        246,
+                      ), // ✅ light white
+                      border: Border.all(color: Colors.teal, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        items[index],
+                        size: 40, // ✅ QR mas dako
+                        color: isSelected
+                            ? Colors.teal
+                            : const Color.fromARGB(255, 130, 189, 187),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.white : Colors.transparent,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Row(
+            );
+          }
+
+          // ✅ Normal icons with labels (always visible)
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onItemTapped(index),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     items[index],
-                    size: iconSize,
-                    color: isSelected ? Colors.teal : Colors.white,
+                    size: normalIconSize,
+                    color: isSelected
+                        ? Colors.teal
+                        : const Color.fromARGB(255, 130, 189, 187),
                   ),
-                  if (isSelected) ...[
-                    SizedBox(width: 8),
-                    Text(
-                      _getLabel(index),
-                      style: TextStyle(
-                        color: Colors.teal,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getLabel(index),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected
+                          ? Colors.teal
+                          : const Color.fromARGB(255, 130, 189, 187),
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -75,10 +112,12 @@ class CustomBottomNavBar extends StatelessWidget {
       case 0:
         return 'Home';
       case 1:
-        return 'Instructions';
+        return 'Instruction';
       case 2:
-        return 'Capture';
+        return 'Capture'; // ✅ QR walay label
       case 3:
+        return 'Transaction';
+      case 4:
         return 'Profile';
       default:
         return '';

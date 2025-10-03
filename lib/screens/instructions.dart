@@ -20,25 +20,26 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
   int _selectedIndex = 1;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  setState(() => _selectedIndex = index);
 
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-        // already on the page
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/capture');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-    }
+  switch (index) {
+    case 0:
+      Navigator.pushReplacementNamed(context, '/home');
+      break;
+    case 1:
+      Navigator.pushReplacementNamed(context, '/instructions');
+      break;
+    case 2:
+      Navigator.pushReplacementNamed(context, '/capture');
+      break;
+    case 3:
+      Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
+      break;
+    case 4:
+      Navigator.pushReplacementNamed(context, '/profile');
+      break;
   }
+}
 
   @override
   Widget build(BuildContext context) {

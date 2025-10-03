@@ -51,9 +51,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
 
     switch (index) {
       case 0:
@@ -63,8 +61,12 @@ class _CaptureScreenState extends State<CaptureScreen> {
         Navigator.pushReplacementNamed(context, '/instructions');
         break;
       case 2:
+        Navigator.pushReplacementNamed(context, '/capture');
         break;
       case 3:
+        Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
+        break;
+      case 4:
         Navigator.pushReplacementNamed(context, '/profile');
         break;
     }
@@ -89,8 +91,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bool isWide = constraints.maxWidth > 800;
-          final double contentWidth =
-              isWide ? 500 : constraints.maxWidth * 0.85;
+          final double contentWidth = isWide
+              ? 500
+              : constraints.maxWidth * 0.85;
 
           return Center(
             child: SingleChildScrollView(
@@ -101,8 +104,11 @@ class _CaptureScreenState extends State<CaptureScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _image == null
-                        ? const Icon(Icons.camera_alt,
-                            size: 100, color: Colors.grey)
+                        ? const Icon(
+                            Icons.camera_alt,
+                            size: 100,
+                            color: Colors.grey,
+                          )
                         : Image.file(_image!, height: 200),
                     const SizedBox(height: 20),
                     Text(
@@ -146,8 +152,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.teal,
                                 side: const BorderSide(color: Colors.teal),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),

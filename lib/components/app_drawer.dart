@@ -47,8 +47,11 @@ class AppDrawer extends StatelessWidget {
                           ? NetworkImage(photoUrl)
                           : null,
                       child: (photoUrl == null || photoUrl.isEmpty)
-                          ? const Icon(Icons.person,
-                              size: 40, color: Colors.teal)
+                          ? const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: Colors.teal,
+                            )
                           : null,
                     ),
                     const SizedBox(height: 10),
@@ -61,7 +64,7 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-        
+
           ListTile(
             leading: const Icon(Icons.history),
             title: const Text('History'),
@@ -83,7 +86,10 @@ class AppDrawer extends StatelessWidget {
 
               // ✅ Navigate to login screen
               Navigator.pushNamedAndRemoveUntil(
-                  context, '/login', (route) => false);
+                context,
+                '/login',
+                (route) => false,
+              );
             },
           ),
         ],
