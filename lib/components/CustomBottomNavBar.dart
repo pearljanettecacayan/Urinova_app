@@ -16,7 +16,7 @@ class CustomBottomNavBar extends StatelessWidget {
     final items = [
       Icons.home,
       Icons.list_alt,
-      Icons.qr_code_scanner, // ✅ QR icon (special)
+      Icons.camera_alt_rounded, // ✅ QR icon (special)
       Icons.notifications,
       Icons.person,
     ];
@@ -114,7 +114,7 @@ class CustomBottomNavBar extends StatelessWidget {
       case 1:
         return 'Instruction';
       case 2:
-        return 'Capture'; // ✅ QR walay label
+        return 'Capture';
       case 3:
         return 'Transaction';
       case 4:

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 
@@ -11,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  String? userName; // 👤 store first name from Firestore
 
   final List<Map<String, String>> articles = [
     {
@@ -35,19 +38,55 @@ class _HomeScreenState extends State<HomeScreen> {
     },
   ];
 
-  // ✅ List of image assets for carousel
   final List<String> carouselImages = [
     "assets/images/urine_img.png",
     "assets/images/urine.png",
     "assets/images/urine_img.png",
   ];
 
-  // ✅ Dummy history data
   final List<Map<String, String>> history = [
     {"date": "Sept 28, 2025", "result": "Normal"},
     {"date": "Sept 25, 2025", "result": "Slight Dehydration"},
     {"date": "Sept 20, 2025", "result": "Normal"},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  // 🔍 Fetch first name from Firestore
+  Future<void> _fetchUserName() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists) {
+          final fullName = doc.data()?['name'] ?? user.email ?? 'User';
+          // ✂️ Extract first name (before the first space)
+          final firstName = fullName.split(' ').first;
+          setState(() {
+            userName = firstName;
+          });
+        } else {
+          // fallback if no Firestore document found
+          setState(() {
+            userName = user.email?.split('@').first ?? 'User';
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching user name: $e");
+      setState(() {
+        userName = 'User';
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
@@ -63,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.pushReplacementNamed(context, '/capture');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
+        Navigator.pushReplacementNamed(context, '/notifications');
         break;
       case 4:
         Navigator.pushReplacementNamed(context, '/profile');
@@ -92,15 +131,23 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Greeting
-            Text(
-              "Hello, Pearl !",
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal[900],
-              ),
-            ),
+            // 👋 Greeting Section
+            userName == null
+                ? Row(
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(width: 10),
+                      Text("Loading name..."),
+                    ],
+                  )
+                : Text(
+                    "Hello, ${userName!}!",
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal[900],
+                    ),
+                  ),
             const SizedBox(height: 8),
             Text(
               "Welcome back! Here's your health overview today.",
@@ -109,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 24),
 
-            // ✅ Carousel Slider at the top
+            // 🖼️ Carousel Slider
             CarouselSlider(
               options: CarouselOptions(
                 height: 200.0,
@@ -130,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 24),
 
-            // ✅ Health Summary Section
+            // 💧 Health Summary
             Text(
               "Your Health Summary",
               style: GoogleFonts.poppins(
@@ -144,30 +191,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatCard(
-                  "Hydration",
-                  "75%",
-                  Icons.water_drop,
-                  Colors.blue,
-                ),
-                _buildStatCard(
-                  "Last Scan",
-                  "Normal",
-                  Icons.check_circle,
-                  Colors.green,
-                ),
-                _buildStatCard(
-                  "UTI Risk",
-                  "Low",
-                  Icons.health_and_safety,
-                  Colors.orange,
-                ),
+                _buildStatCard("Hydration", "75%", Icons.water_drop, Colors.blue),
+                _buildStatCard("Last Scan", "Normal", Icons.check_circle, Colors.green),
+                _buildStatCard("UTI Risk", "Low", Icons.health_and_safety, Colors.orange),
               ],
             ),
 
             const SizedBox(height: 24),
 
-            // ✅ History Section
+            // 🕓 History
             Text(
               "Recent History",
               style: GoogleFonts.poppins(
@@ -193,16 +225,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "Result: ${entry["result"]!}",
                     style: GoogleFonts.poppins(fontSize: 13),
                   ),
-                  trailing: Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey,
-                  ),
+                  trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
                   onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/history',
-                    ); // ✅ go to history page
+                    Navigator.pushNamed(context, '/history');
                   },
                 ),
               );
@@ -210,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 24),
 
-            // ✅ Articles Section
+            // 📰 Articles
             Text(
               "Health Articles",
               style: GoogleFonts.poppins(
@@ -251,13 +276,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ✅ Reusable Stat Card
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  // 📊 Reusable Stat Card
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
