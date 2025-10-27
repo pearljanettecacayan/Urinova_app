@@ -177,64 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 24),
 
-            // 💧 Health Summary
-            Text(
-              "Your Health Summary",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal[800],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatCard("Hydration", "75%", Icons.water_drop, Colors.blue),
-                _buildStatCard("Last Scan", "Normal", Icons.check_circle, Colors.green),
-                _buildStatCard("UTI Risk", "Low", Icons.health_and_safety, Colors.orange),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // 🕓 History
-            Text(
-              "Recent History",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal[800],
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...history.map((entry) {
-              return Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ListTile(
-                  leading: Icon(Icons.history, color: Colors.teal),
-                  title: Text(
-                    entry["date"]!,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(
-                    "Result: ${entry["result"]!}",
-                    style: GoogleFonts.poppins(fontSize: 13),
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/history');
-                  },
-                ),
-              );
-            }).toList(),
-
-            const SizedBox(height: 24),
-
+          
             // 📰 Articles
             Text(
               "Health Articles",

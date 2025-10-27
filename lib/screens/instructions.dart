@@ -9,37 +9,37 @@ class InstructionsScreen extends StatefulWidget {
 }
 
 class _InstructionsScreenState extends State<InstructionsScreen> {
-  final List<String> steps = [
-    'Prepare a clean, transparent container.',
-    'Collect a fresh midstream urine sample.',
-    'Place it on a white background under good lighting.',
-    'Open the app and go to the Capture section.',
-    'Align the camera and take a clear photo.',
-  ];
+ final List<String> steps = [
+  'Prepare a clean, transparent container.',
+  'Collect a fresh midstream urine sample.',
+  'Place it on a white background under good lighting (natural light is best).',
+  'Open the app and go to the Capture section.',
+  'Align the camera and take a clear photo.',
+];
 
   int _selectedIndex = 1;
 
   void _onItemTapped(int index) {
-  setState(() => _selectedIndex = index);
+    setState(() => _selectedIndex = index);
 
-  switch (index) {
-    case 0:
-      Navigator.pushReplacementNamed(context, '/home');
-      break;
-    case 1:
-      Navigator.pushReplacementNamed(context, '/instructions');
-      break;
-    case 2:
-      Navigator.pushReplacementNamed(context, '/capture');
-      break;
-    case 3:
-      Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
-      break;
-    case 4:
-      Navigator.pushReplacementNamed(context, '/profile');
-      break;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/instructions');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/capture');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/notifications');
+        break;
+      case 4:
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
       drawer: AppDrawer(),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.teal, // <--- TEAL COLOR
+        backgroundColor: Colors.teal,
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -66,9 +66,7 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
             ),
           ),
         ),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ), // drawer icon color
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -80,6 +78,35 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Caption above the image
+                    Center(
+                      child: Text(
+                        'This is the specific cup you should use.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.teal[700],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Image Section (Clean urine container)
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/images/clean_container.png', // actual image path
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 🧾 Title
                     Text(
                       'Follow these steps:',
                       style: GoogleFonts.poppins(
@@ -88,7 +115,10 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
                         color: Colors.teal[800],
                       ),
                     ),
+
                     const SizedBox(height: 16),
+
+                    // ✅ Step List
                     ...steps.map(
                       (step) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -111,7 +141,10 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
                         ),
                       ),
                     ),
-                    const Spacer(),
+
+                    const SizedBox(height: 40),
+
+                    // ▶️ Next Button
                     Center(
                       child: SizedBox(
                         width: screenWidth > 400 ? 300 : double.infinity,

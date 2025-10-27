@@ -116,7 +116,7 @@ class CustomBottomNavBar extends StatelessWidget {
       case 2:
         return 'Capture';
       case 3:
-        return 'Transaction';
+        return 'Notification';
       case 4:
         return 'Profile';
       default:
