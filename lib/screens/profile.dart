@@ -30,7 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
         break;
       case 4:
-        Navigator.pushReplacementNamed(context, '/profile');
+        /// Already on profile
         break;
     }
   }

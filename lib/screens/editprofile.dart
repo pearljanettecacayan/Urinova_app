@@ -18,10 +18,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController phoneController = TextEditingController();
 
   File? _imageFile;
-  String? _profileImageUrl; // 🔥 Firestore image URL
+  String? _profileImageUrl; 
   final picker = ImagePicker();
 
-  int _selectedIndex = 3;
+  int _selectedIndex = 4;
   bool _loading = false;
 
   @override
@@ -30,7 +30,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _loadUserData();
   }
 
-  /// ✅ Load user data from Firestore
+  /// Load user data from Firestore
   Future<void> _loadUserData() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -49,7 +49,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  /// ✅ Pick image from gallery
+  /// Pick image from gallery
   Future<void> _pickImage() async {
     final picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
@@ -59,30 +59,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  /// Upload image to Supabase storage
   Future<String?> _uploadImage(String uid, File file) async {
-  final fileName = "profile_${uid}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+    final fileName =
+        "profile_${uid}_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
-  try {
-    print("🚀 Trying upload: $fileName");
+    try {
+      await Supabase.instance.client.storage
+          .from('profile_pics')
+          .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
 
-    await Supabase.instance.client.storage
-        .from('profile_pics')
-        .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
+      final publicUrl = Supabase.instance.client.storage
+          .from('profile_pics')
+          .getPublicUrl(fileName);
 
-    final publicUrl = Supabase.instance.client.storage
-        .from('profile_pics')
-        .getPublicUrl(fileName);
-
-    print("✅ Upload success, public URL: $publicUrl");
-    return publicUrl;
-  } catch (e) {
-    print("❌ Upload error: $e");
-    return null;
+      return publicUrl;
+    } catch (e) {
+      print("❌ Upload error: $e");
+      return null;
+    }
   }
-}
 
-
-  /// ✅ Save changes to Firestore
+  /// Save profile changes
   Future<void> _saveChanges() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -99,7 +97,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _loading = true);
 
     try {
-      // Upload new image if selected
       String? photoUrl;
       if (_imageFile != null) {
         photoUrl = await _uploadImage(uid, _imageFile!);
@@ -109,12 +106,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'name': name,
         'email': email,
         'phone': phone,
-        if (photoUrl != null) 'photoUrl': photoUrl, // update only if new
+        if (photoUrl != null) 'photoUrl': photoUrl,
       });
 
-      _showDialog("Saved!", "Your profile has been updated.", onOk: () {
-        Navigator.pop(context);
+      // Add notification
+      await FirebaseFirestore.instance.collection('notifications').add({
+        'userId': uid,
+        'title': 'Profile Updated',
+        'message': 'Your profile has been successfully updated.',
+        'createdAt': Timestamp.now(),
+        'read': false,
       });
+
+      _showDialog("Saved!", "Your profile has been updated.");
     } catch (e) {
       _showDialog("Error", "Failed to update profile: $e");
     } finally {
@@ -122,7 +126,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  void _showDialog(String title, String message, {VoidCallback? onOk}) {
+  void _showDialog(String title, String message) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -134,7 +138,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Text("OK", style: GoogleFonts.poppins(color: Colors.teal)),
             onPressed: () {
               Navigator.of(context).pop();
-              if (onOk != null) onOk();
             },
           ),
         ],
@@ -156,7 +159,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         Navigator.pushNamed(context, '/capture');
         break;
       case 3:
+        Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
         break;
+      case 4:
+      /// Already on profile
+      break;
     }
   }
 
@@ -187,7 +194,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ? FileImage(_imageFile!)
                           : (_profileImageUrl != null
                               ? NetworkImage(_profileImageUrl!)
-                              : null) as ImageProvider?,
+                              : null),
                       child: _imageFile == null && _profileImageUrl == null
                           ? Icon(Icons.person,
                               size: 50, color: Colors.teal[700])
@@ -222,10 +229,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: emailController,
               readOnly: true,
-              decoration: const InputDecoration(
-                hintText: 'Your email',
-                ),
-              ),
+              decoration: const InputDecoration(hintText: 'Your email'),
+            ),
             const SizedBox(height: 20),
             _buildLabel("Phone Number"),
             TextField(

@@ -17,7 +17,6 @@ import 'screens/editprofile.dart';
 import 'screens/history.dart';
 import 'screens/settings.dart';
 import 'screens/home.dart';
-import 'screens/symptoms.dart';
 import 'screens/notifications.dart';
 
 void main() async {
@@ -26,11 +25,12 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ Initialize Supabase
   await Supabase.initialize(
     url: "https://wbsnusrqruytavsrrnwc.supabase.co",
-    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indic251c3JxcnV5dGF2c3JybndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMDM4ODUsImV4cCI6MjA3MzU3OTg4NX0.D1YzwI3yvYYUEH0G9NKxTdbgx7XBax8bAKkD6oDdU38",
+    anonKey:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indic251c3JxcnV5dGF2c3JybndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMDM4ODUsImV4cCI6MjA3MzU3OTg4NX0.D1YzwI3yvYYUEH0G9NKxTdbgx7XBax8bAKkD6oDdU38",
   );
+
   runApp(UrinalysisApp());
 }
 
@@ -40,7 +40,7 @@ class UrinalysisApp extends StatefulWidget {
 }
 
 class _UrinalysisAppState extends State<UrinalysisApp> {
-  bool _darkMode = false; // <-- dark mode state
+  bool _darkMode = false;
 
   void _toggleDarkMode(bool value) {
     setState(() {
@@ -54,7 +54,6 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
       title: 'AI Urinalysis',
       debugShowCheckedModeBanner: false,
       themeMode: _darkMode ? ThemeMode.dark : ThemeMode.light,
-
       theme: ThemeData(
         brightness: Brightness.light,
         fontFamily: 'Roboto',
@@ -82,7 +81,6 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
               const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
-
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         fontFamily: 'Roboto',
@@ -91,31 +89,51 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
           brightness: Brightness.dark,
         ),
       ),
-
-      // ✅ Check kung naka-login ba ang user
       home: FirebaseAuth.instance.currentUser == null
           ? IndexScreen()
           : HomeScreen(),
-
       routes: {
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/introduction': (context) => IntroductionScreen(),
         '/instructions': (context) => InstructionsScreen(),
         '/capture': (context) => CaptureScreen(),
-        '/results': (context) => ResultsScreen(),
-        '/recommendation': (context) => RecommendationScreen(),
         '/profile': (context) => ProfileScreen(),
         '/editProfile': (context) => EditProfileScreen(),
         '/history': (context) => HistoryScreen(),
         '/notifications': (context) => const NotificationsScreen(),
-        '/settings': (context) =>
-            SettingsScreen( // <-- pass dark mode toggle here
+        '/settings': (context) => SettingsScreen(
               darkMode: _darkMode,
               onDarkModeChanged: _toggleDarkMode,
             ),
         '/home': (context) => HomeScreen(),
-        '/symptoms': (context) => SymptomsScreen(),
+      },
+      // Handle screens with parameters dynamically
+      onGenerateRoute: (settings) {
+        if (settings.name == '/results') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (_) => ResultsScreen(
+              hydrationResult: args['hydrationResult'],
+              utiRisk: args['utiRisk'],
+              confidence: args['confidence'],
+              symptoms: args['symptoms'],
+              medications: args['medications'],
+            ),
+          );
+        }
+
+        if (settings.name == '/recommendation') {
+          final args = settings.arguments as Map<String, String>;
+          return MaterialPageRoute(
+            builder: (_) => RecommendationScreen(
+              utiRisk: args['utiRisk']!,
+              hydrationResult: args['hydrationResult']!,
+            ),
+          );
+        }
+
+        return null; // Unknown route
       },
     );
   }

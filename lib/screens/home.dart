@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
+import 'package:urinalysis_app/helpers/tflite_helper.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -54,7 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _fetchUserName();
+    TFLiteHelper().loadModel(); // Load model once at app start
   }
+
 
   // 🔍 Fetch first name from Firestore
   Future<void> _fetchUserName() async {

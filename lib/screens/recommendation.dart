@@ -3,20 +3,61 @@ import 'package:google_fonts/google_fonts.dart';
 import '../components/CustomBottomNavBar.dart';
 
 class RecommendationScreen extends StatefulWidget {
+  final String utiRisk;
+  final String hydrationResult;
+
+  const RecommendationScreen({
+    super.key,
+    required this.utiRisk,
+    required this.hydrationResult,
+  });
+
   @override
   _RecommendationScreenState createState() => _RecommendationScreenState();
 }
 
 class _RecommendationScreenState extends State<RecommendationScreen> {
   int _selectedIndex = 2; // Index 2 = Capture
+  late List<String> tips;
 
-  final List<String> tips = [
-    'Drink at least 8 glasses of water per day.',
-    'Avoid sugary and caffeinated drinks.',
-    'Practice good hygiene after using the toilet.',
-    'Monitor your symptoms and test regularly.',
-    'See a doctor if symptoms persist.',
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    tips = [];
+
+    // UTI Risk-based tips
+    if (widget.utiRisk.toLowerCase() == 'high') {
+      tips.addAll([
+        'See a doctor as soon as possible.',
+        'Urinate frequently and don’t hold it in.',
+        'Maintain good hygiene after using the toilet.',
+      ]);
+    } else if (widget.utiRisk.toLowerCase() == 'medium') {
+      tips.addAll([
+        'Monitor your symptoms closely.',
+        'Avoid sugary drinks.',
+        'Consult a doctor if symptoms worsen.',
+      ]);
+    } else {
+      tips.addAll([
+        'Maintain proper hygiene.',
+        'Stay aware of your symptoms.',
+      ]);
+    }
+
+    // Hydration-based tips
+    if (widget.hydrationResult.toLowerCase() == 'low') {
+      tips.addAll([
+        'Increase your water intake to stay hydrated.',
+        'Avoid caffeine and alcohol.',
+      ]);
+    } else if (widget.hydrationResult.toLowerCase() == 'moderate') {
+      tips.add('Maintain your current water intake.');
+    } else if (widget.hydrationResult.toLowerCase() == 'high') {
+      tips.add('Keep up your good hydration habits.');
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -31,8 +72,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         Navigator.pushNamed(context, '/instructions');
         break;
       case 2:
-        // Already on this screen
-        break;
+        break; // Already on this screen
       case 3:
         Navigator.pushNamed(context, '/profile');
         break;
@@ -44,7 +84,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        iconTheme: const IconThemeData(color: Colors.white), // White back arrow
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           'Recommendations',
           style: GoogleFonts.poppins(
@@ -59,7 +99,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Health Tips:',
+              'Personalized Health Tips:',
               style: GoogleFonts.poppins(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -103,7 +143,8 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                 ),
                 child: Text(
                   'Done',
-                  style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
+                  style: GoogleFonts.poppins(
+                      fontSize: 18, color: Colors.white),
                 ),
               ),
             ),

@@ -33,14 +33,16 @@ dependencies:
   carousel_slider: ^5.0.0
     
   google_fonts: ^6.1.0
-  intl: ^0.19.0 
+  intl: ^0.20.2 
  
   firebase_core: ^4.0.0
   firebase_auth: ^6.0.1
   cloud_firestore: ^6.0.0
   firebase_storage: ^13.0.0
   image_picker: ^1.1.2
-
+  image: ^4.0.17
+  tflite_flutter: ^0.12.1
+  #tflite_flutter_helper: ^0.3.0
   supabase_flutter: ^2.5.0
   
 
@@ -59,7 +61,7 @@ dev_dependencies:
   # activated in the analysis_options.yaml file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -73,6 +75,8 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/models/best_head_quant.tflite
+    - assets/models/labels.txt
 
   # To add assets to your application, add an assets section, like this:
   # assets:

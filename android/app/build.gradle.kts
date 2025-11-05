@@ -8,12 +8,16 @@ plugins {
 android {
     namespace = "com.example.urinalysis_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"  // match with installed NDK
+    ndkVersion = "27.0.12077973"
+
+    aaptOptions {
+    noCompress += listOf("tflite")
+    }
 
     defaultConfig {
         applicationId = "com.example.urinalysis_app"
-        minSdk = flutter.minSdkVersion   // ✅ fixed
-        targetSdk = 34                   // ✅ consistent
+        minSdk = flutter.minSdkVersion
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
     }
@@ -45,4 +49,5 @@ dependencies {
     // Firebase products
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.android.gms:play-services-base:18.3.0")
 }
