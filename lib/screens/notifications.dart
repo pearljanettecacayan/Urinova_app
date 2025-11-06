@@ -16,7 +16,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   int _selectedIndex = 3;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  bool _hasUnread = false;
 
   @override
   void initState() {
@@ -35,7 +34,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         .snapshots()
         .listen((snapshot) {
       setState(() {
-        _hasUnread = snapshot.docs.isNotEmpty;
       });
     });
   }

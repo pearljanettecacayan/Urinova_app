@@ -13,7 +13,6 @@ class _LoginScreenState extends State<LoginScreen>
   final TextEditingController passwordController = TextEditingController();
 
   late AnimationController _controller;
-  late Animation<double> _animation;
 
   bool _loading = false;
   bool _obscurePassword = true; // <-- password visibility state
@@ -82,9 +81,6 @@ class _LoginScreenState extends State<LoginScreen>
       duration: Duration(milliseconds: 1200),
     )..repeat(reverse: true);
 
-    _animation = Tween<double>(begin: -0.2, end: 0.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
   }
 
   @override
