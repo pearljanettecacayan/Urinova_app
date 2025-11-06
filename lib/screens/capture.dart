@@ -188,7 +188,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: isWide ? 18 : 16,
-                        color: Colors.black87,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 40),

@@ -17,7 +17,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
-  String _selectedLanguage = 'English';
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           'Settings',
-          style: GoogleFonts.poppins(color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
       ),
       body: ListView(
@@ -54,10 +56,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('Dark Mode', style: GoogleFonts.poppins()),
             value: widget.darkMode,
             onChanged: (value) {
-              widget.onDarkModeChanged(value); // call function from main.dart
+              widget.onDarkModeChanged(value);
             },
           ),
-          const SizedBox(height: 20),
         ],
       ),
     );

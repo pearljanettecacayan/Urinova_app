@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               elevation: 3,
               child: ExpansionTile(
-               leading: const Icon(Icons.info_outline, color: Colors.teal),
+                leading: const Icon(Icons.info_outline, color: Colors.teal),
                 title: Text("Urine Overview", style: GoogleFonts.poppins()),
                 children: [
                   Padding(
@@ -200,7 +200,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           "It serves as an important diagnostic indicator for dehydration, urinary tract infection (UTI), and other health conditions.",
                           style: GoogleFonts.poppins(
                             fontSize: 14,
-                            color: Colors.black87,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
                             height: 1.5,
                           ),
                           textAlign: TextAlign.justify,
