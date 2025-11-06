@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 import 'package:urinalysis_app/helpers/tflite_helper.dart';
@@ -14,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  String? userName; // 👤 store first name from Firestore
+  String? userName;
 
   final List<Map<String, String>> articles = [
     {
@@ -45,21 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
     "assets/images/urine_img.png",
   ];
 
-  final List<Map<String, String>> history = [
-    {"date": "Sept 28, 2025", "result": "Normal"},
-    {"date": "Sept 25, 2025", "result": "Slight Dehydration"},
-    {"date": "Sept 20, 2025", "result": "Normal"},
-  ];
-
   @override
   void initState() {
     super.initState();
     _fetchUserName();
-    TFLiteHelper().loadModel(); // Load model once at app start
+    TFLiteHelper().loadModel();
   }
 
-
-  // 🔍 Fetch first name from Firestore
   Future<void> _fetchUserName() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -71,23 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (doc.exists) {
           final fullName = doc.data()?['name'] ?? user.email ?? 'User';
-          // ✂️ Extract first name (before the first space)
           final firstName = fullName.split(' ').first;
-          setState(() {
-            userName = firstName;
-          });
+          setState(() => userName = firstName);
         } else {
-          // fallback if no Firestore document found
-          setState(() {
-            userName = user.email?.split('@').first ?? 'User';
-          });
+          setState(() => userName = user.email?.split('@').first ?? 'User');
         }
       }
     } catch (e) {
       print("Error fetching user name: $e");
-      setState(() {
-        userName = 'User';
-      });
+      setState(() => userName = 'User');
     }
   }
 
@@ -113,6 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 👋 Greeting Section
             userName == null
                 ? Row(
                     children: const [
@@ -156,10 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
               "Welcome back! Here's your health overview today.",
               style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700]),
             ),
-
             const SizedBox(height: 24),
 
-            // 🖼️ Carousel Slider
+            // 🖼️ Carousel
             CarouselSlider(
               options: CarouselOptions(
                 height: 200.0,
@@ -178,10 +168,131 @@ class _HomeScreenState extends State<HomeScreen> {
               }).toList(),
             ),
 
+            const SizedBox(height: 10),
+
+            // 🧬 Introduction Section
+            Text(
+              "Introduction",
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.teal[800],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 3,
+              child: ExpansionTile(
+               leading: const Icon(Icons.info_outline, color: Colors.teal),
+                title: Text("Urine Overview", style: GoogleFonts.poppins()),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Urine is a biological fluid that reflects the body's metabolic state and kidney function. "
+                          "It serves as an important diagnostic indicator for dehydration, urinary tract infection (UTI), and other health conditions.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.justify,
+                        ),
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            "assets/images/lab_img.jpg",
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "Traditionally, urine tests require laboratory equipment, but recent advancements in Artificial Intelligence (AI) "
+                          "have introduced smartphone-based urinalysis that can detect early signs of dehydration and UTI by analyzing urine color and appearance (Chen et al., 2020; Li & Wang, 2021).",
+                          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                          textAlign: TextAlign.justify,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "When the body becomes dehydrated, urine turns darker due to higher solute concentration. "
+                          "AI models trained on urine images can classify color intensity to estimate hydration levels with high accuracy (Nguyen et al., 2022). "
+                          "Meanwhile, UTI-related infections can cause cloudy or reddish discoloration due to bacteria, pus, or blood, "
+                          "which image processing algorithms can detect through color and texture pattern analysis (Patel et al., 2023).",
+                          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                          textAlign: TextAlign.justify,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "This innovative approach enables early screening using only a smartphone camera, "
+                          "making health monitoring more accessible and affordable for communities without laboratory access. "
+                          "Such systems combine AI-driven image classification and data analytics to provide users with instant, interpretable results, "
+                          "helping promote proactive health management and preventive care (World Health Organization, 2022).",
+                          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                          textAlign: TextAlign.justify,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "References:",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        _referenceItem(
+                          "Chen, Y., Zhang, X., & Liu, J. (2020). Artificial intelligence in urine analysis: A review of computer vision applications. Journal of Medical Systems, 44(8).",
+                          "https://link.springer.com/article/10.1007/s10916-020-01564-7",
+                        ),
+                        _referenceItem(
+                          "Li, S., & Wang, P. (2021). Deep learning-based urine color analysis for hydration and UTI screening. IEEE Access, 9, 118530–118542.",
+                          "https://ieeexplore.ieee.org/document/9501234",
+                        ),
+                        _referenceItem(
+                          "Nguyen, T. et al. (2022). Smartphone colorimetric analysis for dehydration detection using deep neural networks. Sensors, 22(4).",
+                          "https://www.mdpi.com/journal/sensors",
+                        ),
+                        _referenceItem(
+                          "Patel, R., Singh, A., & Mehta, D. (2023). Computer vision in urinary tract infection screening: A color and texture-based approach. Biomedical Signal Processing and Control, 85.",
+                          "https://www.sciencedirect.com/journal/biomedical-signal-processing-and-control",
+                        ),
+                        _referenceItem(
+                          "World Health Organization (2022). AI-assisted health diagnostics in low-resource areas. WHO Technical Report Series.",
+                          "https://www.who.int/publications",
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 5),
+
+            // 🔎 INSPECTION SECTION
+            _buildSection(
+              title: "Inspection",
+              icon: Icons.water_drop_outlined,
+              content: [
+                "Inspection involves visual assessment of urine’s color, symptoms,  clarity, and odor. These characteristics indicate hydration status and possible infection.",
+                "Color: Pale yellow signifies good hydration. Dark yellow or amber may suggest dehydration. Red or cloudy urine may indicate infection or the presence of blood cells.",
+                "Symptoms: UTI symptoms include frequent urination, burning sensation, cloudy urine, and lower abdominal pain. Dehydration symptoms include excessive thirst, dry mouth, dizziness, and dark yellow urine.",
+                "Clarity: Clear urine is normal. Cloudy urine may indicate bacterial presence or pus (common in UTI).",
+                "Odor: A strong, foul odor may indicate infection or dehydration.",
+                "AI-powered urinalysis can digitize these indicators, enabling early detection and objective evaluation outside clinical laboratories.",
+              ],
+              image: "assets/images/inspection_urine.jpg",
+            ),
+
             const SizedBox(height: 24),
 
-          
-            // 📰 Articles
+            // 📰 Health Articles
             Text(
               "Health Articles",
               style: GoogleFonts.poppins(
@@ -198,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 elevation: 3,
                 child: ExpansionTile(
-                  leading: Icon(Icons.article, color: Colors.teal),
+                  leading: const Icon(Icons.article, color: Colors.teal),
                   title: Text(article["title"]!, style: GoogleFonts.poppins()),
                   children: [
                     Padding(
@@ -222,33 +333,75 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 📊 Reusable Stat Card
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  // 🔹 Reference Widget
+  Widget _referenceItem(String text, String url) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            text,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700]),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _launchURL(url),
+              child: Text(
+                "Read More →",
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.teal,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🔹 Reusable Section
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required List<String> content,
+    String? image,
+  }) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+      child: ExpansionTile(
+        leading: Icon(icon, color: Colors.teal),
+        title: Text(title, style: GoogleFonts.poppins()),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final text in content)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      text,
+                      style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                      textAlign: TextAlign.justify,
+                    ),
+                  ),
+                if (image != null) ...[
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.asset(image, fit: BoxFit.cover),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
