@@ -14,12 +14,17 @@ class HistoryScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text('History', style: GoogleFonts.poppins(color: Colors.white)),
+        title: Text('History',     style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),),
       ),
       body: user == null
           ? Center(
-              child: Text('Please log in to view your history.',
-                  style: GoogleFonts.poppins(fontSize: 16)),
+              child: Text(
+                'Please log in to view your history.',
+                style: GoogleFonts.poppins(fontSize: 16),
+              ),
             )
           : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -34,8 +39,10 @@ class HistoryScreen extends StatelessWidget {
 
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text('Error loading history.',
-                        style: GoogleFonts.poppins(fontSize: 16)),
+                    child: Text(
+                      'Error loading history.',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
                   );
                 }
 
@@ -43,8 +50,10 @@ class HistoryScreen extends StatelessWidget {
 
                 if (docs.isEmpty) {
                   return Center(
-                    child: Text('No history found.',
-                        style: GoogleFonts.poppins(fontSize: 16)),
+                    child: Text(
+                      'No history found.',
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
                   );
                 }
 
@@ -64,12 +73,12 @@ class HistoryScreen extends StatelessWidget {
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
-                        leading:
-                            const Icon(Icons.history, color: Colors.teal),
+                        leading: const Icon(Icons.history, color: Colors.teal),
                         title: Text(
                           '${date.month}/${date.day}/${date.year}',
                           style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         subtitle: Text(
                           'Hydration: $hydration • UTI Risk: $utiRisk',
