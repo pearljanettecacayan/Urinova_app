@@ -8,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ Supabase
 import '../components/CustomBottomNavBar.dart';
 
 class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
+
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
 }

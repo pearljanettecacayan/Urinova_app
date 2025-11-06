@@ -79,12 +79,15 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.logout),
             title: const Text('Log Out'),
             onTap: () async {
-              Navigator.pop(context); // close drawer
+              Navigator.pop(context); // ✅ Close drawer immediately
 
-              // ✅ Sign out from Firebase
+              // ✅ Sign out asynchronously
               await FirebaseAuth.instance.signOut();
 
-              // ✅ Navigate to login screen
+              // ✅ Guard context after async call
+              if (!context.mounted) return;
+
+              // ✅ Navigate to login screen safely
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/login',

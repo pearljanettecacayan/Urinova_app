@@ -52,7 +52,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     super.initState();
     _imageFile = widget.imageFile;
 
-    for (var s in _symptoms) _selectedSymptoms[s] = false;
+    for (var s in _symptoms) {
+      _selectedSymptoms[s] = false;
+    }
     for (var m in _medicationQuestions) _selectedMedications[m] = false;
 
     _loadModelInBackground();
@@ -238,7 +240,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 title: Text(symptom, style: GoogleFonts.poppins()),
                 activeColor: Colors.teal,
               );
-            }).toList(),
+            }),
             const SizedBox(height: 24),
             Text(
               "Medication Intake Questions:",
@@ -258,7 +260,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 title: Text(question, style: GoogleFonts.poppins()),
                 activeColor: Colors.teal,
               );
-            }).toList(),
+            }),
             const SizedBox(height: 24),
             Center(
               child: SizedBox(

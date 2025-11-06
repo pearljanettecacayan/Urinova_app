@@ -9,6 +9,8 @@ import '../components/CustomBottomNavBar.dart';
 import 'symptoms.dart';
 
 class CaptureScreen extends StatefulWidget {
+  const CaptureScreen({super.key});
+
   @override
   _CaptureScreenState createState() => _CaptureScreenState();
 }

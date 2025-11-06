@@ -35,6 +35,8 @@ void main() async {
 }
 
 class UrinalysisApp extends StatefulWidget {
+  const UrinalysisApp({super.key});
+
   @override
   State<UrinalysisApp> createState() => _UrinalysisAppState();
 }

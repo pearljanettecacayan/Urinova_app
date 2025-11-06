@@ -6,10 +6,10 @@ class SettingsScreen extends StatefulWidget {
   final ValueChanged<bool> onDarkModeChanged;
 
   const SettingsScreen({
-    Key? key,
+    super.key,
     required this.darkMode,
     required this.onDarkModeChanged,
-  }) : super(key: key);
+  });
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
