@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class IntroductionScreen extends StatefulWidget {
+  const IntroductionScreen({super.key});
+
   @override
   State<IntroductionScreen> createState() => _IntroductionScreenState();
 }

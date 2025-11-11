@@ -4,6 +4,8 @@ import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 
 class InstructionsScreen extends StatefulWidget {
+  const InstructionsScreen({super.key});
+
   @override
   _InstructionsScreenState createState() => _InstructionsScreenState();
 }

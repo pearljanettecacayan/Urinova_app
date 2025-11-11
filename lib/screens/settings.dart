@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   final bool darkMode;
@@ -17,6 +18,24 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationPreference();
+  }
+
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    });
+  }
+
+  Future<void> _saveNotificationPreference(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notificationsEnabled', value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +65,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SwitchListTile(
             title: Text('Enable Notifications', style: GoogleFonts.poppins()),
             value: _notificationsEnabled,
-            onChanged: (value) {
+            onChanged: (value) async {
               setState(() {
                 _notificationsEnabled = value;
               });
+              await _saveNotificationPreference(value);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    value ? 'Notifications enabled' : 'Notifications disabled',
+                  ),
+                ),
+              );
             },
           ),
           SwitchListTile(
@@ -59,6 +87,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               widget.onDarkModeChanged(value);
             },
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );

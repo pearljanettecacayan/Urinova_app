@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 10),
 
-            // 🧬 Introduction Section
+            // Introduction Section
             Text(
               "Introduction",
               style: GoogleFonts.poppins(

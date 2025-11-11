@@ -32,7 +32,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
   void initState() {
     super.initState();
     _addNotification();
-    _saveResultToHistory(); // 🆕 Save result when this screen loads
   }
 
   /// ✅ Add notification for results
@@ -51,27 +50,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
       });
     } catch (e) {
       print("Error adding notification: $e");
-    }
-  }
-
-  /// 🆕 Save results to Firestore (for History screen)
-  Future<void> _saveResultToHistory() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-
-    try {
-      await FirebaseFirestore.instance.collection('history').add({
-        'userId': uid,
-        'date': Timestamp.now(),
-        'hydration': widget.hydrationResult,
-        'utiRisk': widget.utiRisk,
-        'confidence': widget.confidence,
-        'symptoms': widget.symptoms,
-        'medications': widget.medications,
-      });
-      print("✅ History saved successfully!");
-    } catch (e) {
-      print("⚠️ Error saving history: $e");
     }
   }
 

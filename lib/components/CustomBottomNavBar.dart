@@ -1,28 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class CustomBottomNavBar extends StatelessWidget {
+class CustomBottomNavBar extends StatefulWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
 
   const CustomBottomNavBar({
-    super.key,
+    Key? key,
     required this.selectedIndex,
     required this.onItemTapped,
-  });
+  }) : super(key: key);
+
+  @override
+  State<CustomBottomNavBar> createState() => _CustomBottomNavBarState();
+}
+
+class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
+  bool _notificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationPreference();
+  }
+
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('notifications')
-          .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-          .where('read', isEqualTo: false)
-          .snapshots(),
+      stream: _notificationsEnabled
+          ? FirebaseFirestore.instance
+              .collection('notifications')
+              .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+              .where('read', isEqualTo: false)
+              .snapshots()
+          : const Stream.empty(), // 🔕 stop listening if disabled
       builder: (context, snapshot) {
-        bool hasUnreadNotif =
-            snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+        bool hasUnreadNotif = _notificationsEnabled &&
+            snapshot.hasData &&
+            snapshot.data!.docs.isNotEmpty;
 
         double normalIconSize = 35;
         final items = [
@@ -39,13 +63,13 @@ class CustomBottomNavBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (index) {
-              final isSelected = selectedIndex == index;
+              final isSelected = widget.selectedIndex == index;
 
-              // center camera icon
+              // Center camera icon
               if (index == 2) {
                 return Expanded(
                   child: GestureDetector(
-                    onTap: () => onItemTapped(index),
+                    onTap: () => widget.onItemTapped(index),
                     child: Transform.translate(
                       offset: const Offset(0, -20),
                       child: Container(
@@ -78,10 +102,10 @@ class CustomBottomNavBar extends StatelessWidget {
                 );
               }
 
-              // normal icons (with badge)
+              // Normal icons with badge
               return Expanded(
                 child: GestureDetector(
-                  onTap: () => onItemTapped(index),
+                  onTap: () => widget.onItemTapped(index),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
