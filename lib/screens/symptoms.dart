@@ -30,26 +30,23 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
   bool _isUrine = true;
 
   final List<String> _symptoms = [
-    "Burning sensation during urination",
-    "Frequent urge to urinate",
-    "Cloudy urine",
-    "Strong-smelling urine",
-    "Lower abdominal pain",
-    "Fever or chills",
-    "None",
-  ];
-
-  final List<String> _medicationQuestions = [
-    "Are you currently taking antibiotics?",
-    "Are you taking pain relievers (e.g., paracetamol, ibuprofen)?",
-    "Are you on any medication for urinary problems?",
-    "Are you taking vitamins or supplements?",
-    "Are you taking any herbal medicine for urinary symptoms?",
+    "Pain in your flank, abdomen, pelvic area or lower back.",
+    "Pressure in the lower part of your pelvis.",
+    "Cloudy, foul-smelling pee.",
+    "Urinary incontinence.",
+    "Frequent urination.",
+    "Urge incontinence.",
+    "Pain when you pee (dysuria).",
+    "Blood in your pee (hematuria).",
+    "Extreme thirst",
+    "Less frequent urination",
+    "Dark-colored urine",
+    "Fatigue",
+    "Dizziness",
     "None",
   ];
 
   final Map<String, bool> _selectedSymptoms = {};
-  final Map<String, bool> _selectedMedications = {};
 
   @override
   void initState() {
@@ -58,9 +55,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
 
     for (var s in _symptoms) {
       _selectedSymptoms[s] = false;
-    }
-    for (var m in _medicationQuestions) {
-      _selectedMedications[m] = false;
     }
 
     _loadModelInBackground();
@@ -130,13 +124,10 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     if (delta == 0) {
       hue = 0;
     } else if (max == r)
-      // ignore: curly_braces_in_flow_control_structures
       hue = 60 * (((g - b) / delta) % 6);
     else if (max == g)
-      // ignore: curly_braces_in_flow_control_structures
       hue = 60 * (((b - r) / delta) + 2);
     else if (max == b)
-      // ignore: curly_braces_in_flow_control_structures
       hue = 60 * (((r - g) / delta) + 4);
     if (hue < 0) hue += 360;
     return hue;
@@ -148,9 +139,8 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     setState(() => _isLoading = true);
 
     if (!await _imageFile.exists()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Image file not found!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Image file not found!')));
       setState(() => _isLoading = false);
       return;
     }
@@ -160,9 +150,8 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
       results = await _tfliteHelper.runModel(_imageFile);
       if (results.isEmpty) throw Exception("Inference returned empty results");
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error during inference: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error during inference: $e')));
       setState(() => _isLoading = false);
       return;
     }
@@ -176,10 +165,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         .where((e) => e.value)
         .map((e) => e.key)
         .toList();
-    final selectedMeds = _selectedMedications.entries
-        .where((e) => e.value)
-        .map((e) => e.key)
-        .toList();
 
     late String imageUrl;
     final fileName = 'urine_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -188,9 +173,8 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
       await supabase.storage.from(bucketName).upload(fileName, _imageFile);
       imageUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Supabase upload failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Supabase upload failed: $e')));
       setState(() => _isLoading = false);
       return;
     }
@@ -198,25 +182,21 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Please log in first.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please log in first.')));
         setState(() => _isLoading = false);
         return;
       }
 
-      // ✅ Save analysis results
       await FirebaseFirestore.instance.collection('analysis_results').add({
         'userId': user.uid,
         'timestamp': DateTime.now(),
         'result': bestLabel,
         'confidence': confidence,
         'symptoms': selectedSymptoms,
-        'medications': selectedMeds,
         'imageUrl': imageUrl,
       });
 
-      // ✅ Save to history (only once)
       final historyRef = FirebaseFirestore.instance.collection('history');
       final existing = await historyRef
           .where('userId', isEqualTo: user.uid)
@@ -233,9 +213,8 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Firestore save failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Firestore save failed: $e')));
       setState(() => _isLoading = false);
       return;
     }
@@ -250,7 +229,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
           utiRisk: bestLabel == 'Possible UTI' ? 'High' : 'Low',
           confidence: confidence,
           symptoms: selectedSymptoms,
-          medications: selectedMeds,
         ),
       ),
     );
@@ -362,26 +340,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 onChanged: (val) =>
                     setState(() => _selectedSymptoms[symptom] = val ?? false),
                 title: Text(symptom, style: GoogleFonts.poppins()),
-                activeColor: Colors.teal,
-              );
-            }),
-            const SizedBox(height: 24),
-            Text(
-              "Medication Intake Questions:",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal[800],
-              ),
-            ),
-            const SizedBox(height: 12),
-            ..._medicationQuestions.map((question) {
-              return CheckboxListTile(
-                value: _selectedMedications[question],
-                onChanged: (val) => setState(
-                  () => _selectedMedications[question] = val ?? false,
-                ),
-                title: Text(question, style: GoogleFonts.poppins()),
                 activeColor: Colors.teal,
               );
             }),

@@ -8,9 +8,8 @@ import 'recommendation.dart';
 class ResultsScreen extends StatefulWidget {
   final String hydrationResult;
   final String utiRisk;
-  final String confidence; 
+  final String confidence;
   final List<String> symptoms;
-  final List<String> medications;
 
   const ResultsScreen({
     super.key,
@@ -18,7 +17,6 @@ class ResultsScreen extends StatefulWidget {
     required this.utiRisk,
     required this.confidence,
     required this.symptoms,
-    required this.medications,
   });
 
   @override
@@ -78,7 +76,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           'Analysis Results',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
       ),
       body: Padding(
@@ -113,17 +114,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
             const SizedBox(height: 20),
             Text(
               "Selected Symptoms:",
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 16),
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 8),
-            ...widget.symptoms.map((s) => Text("• $s", style: GoogleFonts.poppins(fontSize: 14))),
-            const SizedBox(height: 12),
-            Text(
-              "Medications Reported:",
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 16),
+            ...widget.symptoms.map(
+              (s) => Text("• $s", style: GoogleFonts.poppins(fontSize: 14)),
             ),
-            const SizedBox(height: 8),
-            ...widget.medications.map((m) => Text("• $m", style: GoogleFonts.poppins(fontSize: 14))),
             const Spacer(),
             SizedBox(
               width: double.infinity,
@@ -160,14 +159,20 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
-  Widget _buildResultCard(String title, String status, String confidence, IconData icon, Color iconColor) {
+  Widget _buildResultCard(
+    String title,
+    String status,
+    String confidence,
+    IconData icon,
+    Color iconColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
       child: Row(
@@ -178,12 +183,30 @@ class _ResultsScreenState extends State<ResultsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(status, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[800])),
+                Text(
+                  status,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey[800],
+                  ),
+                ),
                 if (confidence.isNotEmpty) ...[
                   const SizedBox(height: 2),
-                  Text("Confidence: $confidence%", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600])),
+                  Text(
+                    "Confidence: $confidence%",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ],
               ],
             ),

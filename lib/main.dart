@@ -120,7 +120,6 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
               utiRisk: args['utiRisk'],
               confidence: args['confidence'],
               symptoms: args['symptoms'],
-              medications: args['medications'],
             ),
           );
         }

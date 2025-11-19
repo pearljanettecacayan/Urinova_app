@@ -9,6 +9,8 @@ import '../components/CustomBottomNavBar.dart';
 import 'package:urinalysis_app/helpers/tflite_helper.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
