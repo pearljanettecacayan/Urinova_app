@@ -29,7 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/capture');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
+        Navigator.pushReplacementNamed(context, '/notifications'); 
         break;
       case 4:
 
@@ -38,7 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  /// ✅ Auto-update profile data from Firestore
+  /// Auto-update profile data from Firestore
   Stream<Map<String, dynamic>?> _userDataStream() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return const Stream.empty();
@@ -97,14 +97,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  /// ✅ Profile Image (Firebase or Supabase URL works)
+                  /// Profile Image (Firebase or Supabase URL works)
                   CircleAvatar(
                     radius: 55,
                     backgroundColor: Colors.teal[100],
                     backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
                         ? NetworkImage(
                             photoUrl,
-                          ) // 👈 works for Supabase public URL
+                          ) // works for Supabase public URL
                         : null,
                     child: (photoUrl == null || photoUrl.isEmpty)
                         ? Icon(Icons.person, size: 60, color: Colors.teal[700])

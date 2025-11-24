@@ -31,13 +31,13 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _loading = true);
 
     try {
-      // ✅ Authenticate with Firebase
+      // Authenticate with Firebase
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // ✅ If login success -> navigate to Home
+      // If login success -> navigate to Home
       Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       String message;
@@ -61,8 +61,10 @@ class _LoginScreenState extends State<LoginScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Login Failed",
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title: Text(
+          "Login Failed",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
         content: Text(message, style: GoogleFonts.poppins()),
         actions: [
           TextButton(
@@ -82,7 +84,6 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
       duration: Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-
   }
 
   @override
@@ -96,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ✅ Same background gradient
+      // Same background gradient
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -111,13 +112,15 @@ class _LoginScreenState extends State<LoginScreen>
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 400),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 40,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // ✅ Replaced waving hand with URINOVA logo text
+                      // Replaced waving hand with URINOVA logo text
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -158,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                       const SizedBox(height: 32),
 
-                      // ✅ Email field
+                      // Email field
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -181,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                       const SizedBox(height: 20),
 
-                      // ✅ Password field
+                      // Password field
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -216,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                       const SizedBox(height: 32),
 
-                      // ✅ Login button
+                      // Login button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -230,7 +233,8 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                           child: _loading
                               ? const CircularProgressIndicator(
-                                  color: Colors.white)
+                                  color: Colors.white,
+                                )
                               : Text(
                                   'Login',
                                   style: GoogleFonts.poppins(
@@ -243,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                       const SizedBox(height: 16),
 
-                      // ✅ Go to Register
+                      // Go to Register
                       TextButton(
                         onPressed: () =>
                             Navigator.pushNamed(context, '/register'),

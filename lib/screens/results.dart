@@ -9,14 +9,12 @@ class ResultsScreen extends StatefulWidget {
   final String hydrationResult;
   final String utiRisk;
   final String confidence;
-  final List<String> symptoms;
 
   const ResultsScreen({
     super.key,
     required this.hydrationResult,
     required this.utiRisk,
     required this.confidence,
-    required this.symptoms,
   });
 
   @override
@@ -32,7 +30,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     _addNotification();
   }
 
-  /// ✅ Add notification for results
+  /// Add notification for results
   Future<void> _addNotification() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -97,7 +95,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
             const SizedBox(height: 20),
             _buildResultCard(
-              'Hydration Level',
+              'Analysis Result',
               widget.hydrationResult,
               '',
               Icons.water_drop,
@@ -111,17 +109,24 @@ class _ResultsScreenState extends State<ResultsScreen> {
               Icons.warning_amber,
               Colors.green,
             ),
-            const SizedBox(height: 20),
-            Text(
-              "Selected Symptoms:",
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
+            const SizedBox(height: 16),
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.redAccent,
+                ),
+                children: [
+                  TextSpan(
+                    text: "Note: ",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(
+                    text:
+                        "This is for early screening only, not a final diagnosis. Please consult a healthcare professional if symptoms persist or worsen.",
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            ...widget.symptoms.map(
-              (s) => Text("• $s", style: GoogleFonts.poppins(fontSize: 14)),
             ),
             const Spacer(),
             SizedBox(

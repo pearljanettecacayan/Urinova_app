@@ -29,33 +29,10 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
   bool _isUrineImageCheckDone = false;
   bool _isUrine = true;
 
-  final List<String> _symptoms = [
-    "Pain in your flank, abdomen, pelvic area or lower back.",
-    "Pressure in the lower part of your pelvis.",
-    "Cloudy, foul-smelling pee.",
-    "Urinary incontinence.",
-    "Frequent urination.",
-    "Urge incontinence.",
-    "Pain when you pee (dysuria).",
-    "Blood in your pee (hematuria).",
-    "Extreme thirst",
-    "Less frequent urination",
-    "Dark-colored urine",
-    "Fatigue",
-    "Dizziness",
-    "None",
-  ];
-
-  final Map<String, bool> _selectedSymptoms = {};
-
   @override
   void initState() {
     super.initState();
     _imageFile = widget.imageFile;
-
-    for (var s in _symptoms) {
-      _selectedSymptoms[s] = false;
-    }
 
     _loadModelInBackground();
     _checkUrineImage();
@@ -139,8 +116,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     setState(() => _isLoading = true);
 
     if (!await _imageFile.exists()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Image file not found!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Image file not found!')));
       setState(() => _isLoading = false);
       return;
     }
@@ -150,8 +128,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
       results = await _tfliteHelper.runModel(_imageFile);
       if (results.isEmpty) throw Exception("Inference returned empty results");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error during inference: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error during inference: $e')));
       setState(() => _isLoading = false);
       return;
     }
@@ -161,11 +140,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     final bestLabel = labels[bestIndex];
     final confidence = (results[bestIndex] * 100).toStringAsFixed(2);
 
-    final selectedSymptoms = _selectedSymptoms.entries
-        .where((e) => e.value)
-        .map((e) => e.key)
-        .toList();
-
     late String imageUrl;
     final fileName = 'urine_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final bucketName = 'urine_images';
@@ -173,8 +147,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
       await supabase.storage.from(bucketName).upload(fileName, _imageFile);
       imageUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Supabase upload failed: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Supabase upload failed: $e')));
       setState(() => _isLoading = false);
       return;
     }
@@ -182,8 +157,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please log in first.')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Please log in first.')));
         setState(() => _isLoading = false);
         return;
       }
@@ -193,7 +169,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         'timestamp': DateTime.now(),
         'result': bestLabel,
         'confidence': confidence,
-        'symptoms': selectedSymptoms,
         'imageUrl': imageUrl,
       });
 
@@ -213,8 +188,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Firestore save failed: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Firestore save failed: $e')));
       setState(() => _isLoading = false);
       return;
     }
@@ -228,7 +204,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
           hydrationResult: bestLabel == 'Normal' ? 'Normal' : bestLabel,
           utiRisk: bestLabel == 'Possible UTI' ? 'High' : 'Low',
           confidence: confidence,
-          symptoms: selectedSymptoms,
         ),
       ),
     );
@@ -266,7 +241,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         title: Text(
-          'Symptoms & Medications',
+          'Urinova_Analysis',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -324,25 +299,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              "Select Symptoms You Are Experiencing:",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal[800],
-              ),
-            ),
-            const SizedBox(height: 12),
-            ..._symptoms.map((symptom) {
-              return CheckboxListTile(
-                value: _selectedSymptoms[symptom],
-                onChanged: (val) =>
-                    setState(() => _selectedSymptoms[symptom] = val ?? false),
-                title: Text(symptom, style: GoogleFonts.poppins()),
-                activeColor: Colors.teal,
-              );
-            }),
             const SizedBox(height: 24),
             Center(
               child: SizedBox(

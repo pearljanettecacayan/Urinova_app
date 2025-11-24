@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ Supabase
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../components/CustomBottomNavBar.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController phoneController = TextEditingController();
 
   File? _imageFile;
-  String? _profileImageUrl; 
+  String? _profileImageUrl;
   final picker = ImagePicker();
 
   int _selectedIndex = 4;
@@ -37,8 +37,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
-    final doc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
 
     if (doc.exists) {
       final data = doc.data()!;
@@ -77,7 +79,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       return publicUrl;
     } catch (e) {
-      print("❌ Upload error: $e");
+      print("Upload error: $e");
       return null;
     }
   }
@@ -132,8 +134,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(title,
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title: Text(
+          title,
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
         content: Text(message, style: GoogleFonts.poppins()),
         actions: [
           TextButton(
@@ -161,11 +165,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         Navigator.pushNamed(context, '/capture');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/notifications'); // 🔔
+        Navigator.pushReplacementNamed(context, '/notifications');
         break;
       case 4:
-      /// Already on profile
-      break;
+
+        /// Already on profile
+        break;
     }
   }
 
@@ -175,9 +180,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text("Edit Profile",
-            style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600, color: Colors.white)),
+        title: Text(
+          "Edit Profile",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -195,11 +204,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       backgroundImage: _imageFile != null
                           ? FileImage(_imageFile!)
                           : (_profileImageUrl != null
-                              ? NetworkImage(_profileImageUrl!)
-                              : null),
+                                ? NetworkImage(_profileImageUrl!)
+                                : null),
                       child: _imageFile == null && _profileImageUrl == null
-                          ? Icon(Icons.person,
-                              size: 50, color: Colors.teal[700])
+                          ? Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.teal[700],
+                            )
                           : null,
                     ),
                   ),
@@ -223,8 +235,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildLabel("Full Name"),
             TextField(
               controller: nameController,
-              decoration:
-                  const InputDecoration(hintText: 'Enter your full name'),
+              decoration: const InputDecoration(
+                hintText: 'Enter your full name',
+              ),
             ),
             const SizedBox(height: 20),
             _buildLabel("Email"),
@@ -238,8 +251,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: phoneController,
               keyboardType: TextInputType.phone,
-              decoration:
-                  const InputDecoration(hintText: 'Enter your phone number'),
+              decoration: const InputDecoration(
+                hintText: 'Enter your phone number',
+              ),
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -255,9 +269,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : Text("Save Changes",
+                    : Text(
+                        "Save Changes",
                         style: GoogleFonts.poppins(
-                            fontSize: 18, color: Colors.white)),
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -275,8 +293,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style:
-            GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
       ),
     );
   }

@@ -20,7 +20,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
-  // ✅ Capture image from camera
+  // Capture image from camera
   Future<void> _captureImage() async {
     final XFile? captured = await _picker.pickImage(source: ImageSource.camera);
     if (captured == null) return;
@@ -41,7 +41,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
     }
   }
 
-  // ✅ Upload image from gallery
+  // Upload image from gallery
   Future<void> _uploadImage() async {
     final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
@@ -62,7 +62,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
     }
   }
 
-  // ✅ Optimized blur detection (background isolate)
+  // Optimized blur detection (background isolate)
   static bool _checkBlur(String path) {
     try {
       final file = File(path);

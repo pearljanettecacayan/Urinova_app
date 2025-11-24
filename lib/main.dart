@@ -26,9 +26,9 @@ void main() async {
   );
 
   await Supabase.initialize(
-    url: "https://wbsnusrqruytavsrrnwc.supabase.co",
+    url: "https://frlbewjdligucqujelih.supabase.co",
     anonKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indic251c3JxcnV5dGF2c3JybndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMDM4ODUsImV4cCI6MjA3MzU3OTg4NX0.D1YzwI3yvYYUEH0G9NKxTdbgx7XBax8bAKkD6oDdU38",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZybGJld2pkbGlndWNxdWplbGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4Mjg3MzcsImV4cCI6MjA3MjQwNDczN30.0q9dyhcg9XrpfS-44ibcBOmqzKinqg-NMgjNt3KKTCc",
   );
 
   runApp(UrinalysisApp());
@@ -119,7 +119,6 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
               hydrationResult: args['hydrationResult'],
               utiRisk: args['utiRisk'],
               confidence: args['confidence'],
-              symptoms: args['symptoms'],
             ),
           );
         }

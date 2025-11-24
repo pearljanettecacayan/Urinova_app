@@ -20,7 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _loading = false;
 
-  // 👁️ state for toggle password visibility
+  // state for toggle password visibility
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -58,11 +58,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _loading = true);
 
     try {
-      // ✅ Create user in Firebase Auth
+      // Create user in Firebase Auth
       UserCredential userCred = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // ✅ Save extra user data in Firestore
+      // Save extra user data in Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCred.user!.uid)
@@ -110,8 +110,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity, // ✅ full width
-        height: double.infinity, // ✅ full height
+        width: double.infinity, // full width
+        height: double.infinity, // full height
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFa8edea), Color(0xFFfed6e3)],
@@ -233,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // 🔑 modified _buildTextField with toggle support
+  // modified _buildTextField with toggle support
   Widget _buildTextField(
     String label,
     String hint,

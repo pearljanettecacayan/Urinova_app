@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
-  /// ✅ Stream user data from Firestore
+  /// Stream user data from Firestore
   Stream<Map<String, dynamic>?> _userDataStream() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return const Stream.empty();
@@ -79,15 +79,15 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.logout),
             title: const Text('Log Out'),
             onTap: () async {
-              Navigator.pop(context); // ✅ Close drawer immediately
+              Navigator.pop(context); // Close drawer immediately
 
-              // ✅ Sign out asynchronously
+              // Sign out asynchronously
               await FirebaseAuth.instance.signOut();
 
-              // ✅ Guard context after async call
+              // Guard context after async call
               if (!context.mounted) return;
 
-              // ✅ Navigate to login screen safely
+              // Navigate to login screen safely
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/login',

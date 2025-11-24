@@ -38,13 +38,17 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
     return StreamBuilder<QuerySnapshot>(
       stream: _notificationsEnabled
           ? FirebaseFirestore.instance
-              .collection('notifications')
-              .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-              .where('read', isEqualTo: false)
-              .snapshots()
-          : const Stream.empty(), // 🔕 stop listening if disabled
+                .collection('notifications')
+                .where(
+                  'userId',
+                  isEqualTo: FirebaseAuth.instance.currentUser?.uid,
+                )
+                .where('read', isEqualTo: false)
+                .snapshots()
+          : const Stream.empty(), // disabled notification
       builder: (context, snapshot) {
-        bool hasUnreadNotif = _notificationsEnabled &&
+        bool hasUnreadNotif =
+            _notificationsEnabled &&
             snapshot.hasData &&
             snapshot.data!.docs.isNotEmpty;
 
@@ -101,7 +105,6 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                   ),
                 );
               }
-
               // Normal icons with badge
               return Expanded(
                 child: GestureDetector(
@@ -139,8 +142,9 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           color: isSelected
                               ? Colors.teal
                               : const Color.fromARGB(255, 130, 189, 187),
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     ],

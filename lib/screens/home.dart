@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 import 'package:urinalysis_app/helpers/tflite_helper.dart';
@@ -36,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           "Drink at least 8 glasses of water daily. Include fruits and vegetables in your diet, and avoid excessive caffeine or alcohol which may cause dehydration.",
     },
     {
-      "title": "Early Detection of Dehydration in Children",
+      "title": "Early Screening of Dehydration in Children",
       "content":
           "Watch out for signs like dry mouth, no tears when crying, sunken eyes, and decreased urination. Early hydration is key to preventing serious complications.",
     },
@@ -100,12 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24),
 
-            // 🖼️ Carousel
+            // Image Carousel
             CarouselSlider(
               options: CarouselOptions(
                 height: 200.0,
@@ -244,33 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           textAlign: TextAlign.justify,
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          "References:",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        _referenceItem(
-                          "Chen, Y., Zhang, X., & Liu, J. (2020). Artificial intelligence in urine analysis: A review of computer vision applications. Journal of Medical Systems, 44(8).",
-                          "https://link.springer.com/article/10.1007/s10916-020-01564-7",
-                        ),
-                        _referenceItem(
-                          "Li, S., & Wang, P. (2021). Deep learning-based urine color analysis for hydration and UTI screening. IEEE Access, 9, 118530–118542.",
-                          "https://ieeexplore.ieee.org/document/9501234",
-                        ),
-                        _referenceItem(
-                          "Nguyen, T. et al. (2022). Smartphone colorimetric analysis for dehydration detection using deep neural networks. Sensors, 22(4).",
-                          "https://www.mdpi.com/journal/sensors",
-                        ),
-                        _referenceItem(
-                          "Patel, R., Singh, A., & Mehta, D. (2023). Computer vision in urinary tract infection screening: A color and texture-based approach. Biomedical Signal Processing and Control, 85.",
-                          "https://www.sciencedirect.com/journal/biomedical-signal-processing-and-control",
-                        ),
-                        _referenceItem(
-                          "World Health Organization (2022). AI-assisted health diagnostics in low-resource areas. WHO Technical Report Series.",
-                          "https://www.who.int/publications",
-                        ),
                       ],
                     ),
                   ),
@@ -334,36 +300,6 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
-      ),
-    );
-  }
-
-  // 🔹 Reference Widget
-  Widget _referenceItem(String text, String url) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            text,
-            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[700]),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => _launchURL(url),
-              child: Text(
-                "Read More →",
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.teal,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

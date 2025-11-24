@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
-  // ✅ Helper to convert month number to name
+  // Helper to convert month number to name
   String _getMonthName(int month) {
     const monthNames = [
       'January',
@@ -111,7 +111,7 @@ class HistoryScreen extends StatelessWidget {
                           ),
                         ),
                         subtitle: Text(
-                          'Hydration: $hydration • UTI Risk: $utiRisk',
+                          'Analysis Result: $hydration • UTI Risk: $utiRisk',
                           style: GoogleFonts.poppins(fontSize: 14),
                         ),
                         onTap: () {
@@ -167,7 +167,7 @@ class HistoryScreen extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        'Hydration: $hydration',
+                                        'Analysis result: $hydration',
                                         style: GoogleFonts.poppins(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
