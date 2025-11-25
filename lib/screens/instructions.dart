@@ -14,7 +14,7 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
   final List<String> steps = [
     'Prepare a clean, transparent container.',
     'Collect a fresh midstream urine sample.',
-    'Place it on a white background under good lighting (natural light is best).',
+    'Place it on a clean background under good lighting (natural light is best).',
     'Avoid shadows or colored lighting, as they may affect color detection.',
     'Open the app and go to the Capture section.',
     'Align the camera and take a clear photo.',
