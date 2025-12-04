@@ -76,7 +76,7 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/models/best_head_quant.tflite
+    - assets/models/best_float32.tflite
     - assets/models/labels.txt
 
   # To add assets to your application, add an assets section, like this:
