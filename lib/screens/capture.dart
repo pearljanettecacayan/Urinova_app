@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
-import 'symptoms.dart';
+import 'analyze.dart';
 
 class CaptureScreen extends StatefulWidget {
   const CaptureScreen({super.key});

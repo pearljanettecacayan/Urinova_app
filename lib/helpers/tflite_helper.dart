@@ -15,24 +15,24 @@ class TFLiteHelper {
 
   Future<void> loadModel() async {
     try {
-      print('🔍 Loading model...');
+      print('Loading model...');
       _interpreter = await Interpreter.fromAsset('assets/models/best_head_quant.tflite');
-      print('✅ Model loaded!');
+      print('Model loaded!');
 
       final labelData = await rootBundle.loadString('assets/models/labels.txt');
       _labels = labelData
           .split('\n')
           .where((element) => element.trim().isNotEmpty)
           .toList();
-      print('✅ Labels loaded: ${_labels.length}');
+      print('Labels loaded: ${_labels.length}');
     } catch (e) {
-      print('❌ Error loading model: $e');
+      print('Error loading model: $e');
     }
   }
 
   Future<List<double>> runModel(File imageFile) async {
     if (_interpreter == null) {
-      print('⚠️ Interpreter not initialized!');
+      print('Interpreter not initialized!');
       return [];
     }
 
@@ -58,10 +58,10 @@ class TFLiteHelper {
       var output = List.generate(1, (_) => List.filled(_labels.length, 0.0));
       _interpreter!.run(input, output);
 
-      print('✅ Inference done! Output: $output');
+      print('Inference done! Output: $output');
       return List<double>.from(output[0]);
     } catch (e) {
-      print('❌ Error running inference: $e');
+      print('Error running inference: $e');
       return [];
     }
   }
