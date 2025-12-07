@@ -23,7 +23,7 @@ class TFLiteHelper {
         options: InterpreterOptions()..threads = 4,
       );
 
-      print('✅ Model loaded successfully!');
+      print('Model loaded successfully!');
       print('Number of outputs: ${_interpreter!.getOutputTensors().length}');
       for (int i = 0; i < _interpreter!.getOutputTensors().length; i++) {
         print('Output $i shape: ${_interpreter!.getOutputTensor(i).shape}');
@@ -40,7 +40,7 @@ class TFLiteHelper {
       print('Labels loaded: ${_labels.length} classes');
       print('Classes: $_labels');
     } catch (e) {
-      print('❌ Error loading model: $e');
+      print('Error loading model: $e');
       rethrow;
     }
   }
@@ -103,7 +103,7 @@ class TFLiteHelper {
       _interpreter!.runForMultipleInputs([input], outputs);
       final inferenceTime = DateTime.now().difference(startTime).inMilliseconds;
 
-      print('✅ Inference completed in ${inferenceTime}ms');
+      print('Inference completed in ${inferenceTime}ms');
 
       // Parse detections
       final detections = _parseYoloSegOutput(
@@ -122,7 +122,7 @@ class TFLiteHelper {
         'imageSize': {'width': origWidth, 'height': origHeight},
       };
     } catch (e) {
-      print('❌ Error during inference: $e');
+      print('Error during inference: $e');
       return {'success': false, 'error': e.toString(), 'detections': []};
     }
   }
@@ -194,12 +194,12 @@ class TFLiteHelper {
       }
     }
 
-    print('🔍 Found ${detections.length} detections before NMS');
+    print('Found ${detections.length} detections before NMS');
 
     // Apply NMS
     detections = _applyNMS(detections, iouThreshold);
 
-    print('✅ Final detections after NMS: ${detections.length}');
+    print('Final detections after NMS: ${detections.length}');
 
     // Generate masks for each detection
     for (var detection in detections) {
@@ -254,6 +254,6 @@ class TFLiteHelper {
   void close() {
     _interpreter?.close();
     _interpreter = null;
-    print('🔒 Model closed');
+    print('Model closed');
   }
 }

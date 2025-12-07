@@ -21,14 +21,12 @@ import 'screens/notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await Supabase.initialize(
-    url: "https://frlbewjdligucqujelih.supabase.co",
+    url: "https://wbsnusrqruytavsrrnwc.supabase.co",
     anonKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZybGJld2pkbGlndWNxdWplbGloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4Mjg3MzcsImV4cCI6MjA3MjQwNDczN30.0q9dyhcg9XrpfS-44ibcBOmqzKinqg-NMgjNt3KKTCc",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indic251c3JxcnV5dGF2c3JybndjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMDM4ODUsImV4cCI6MjA3MzU3OTg4NX0.D1YzwI3yvYYUEH0G9NKxTdbgx7XBax8bAKkD6oDdU38",
   );
 
   runApp(UrinalysisApp());
@@ -79,8 +77,10 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           fillColor: Colors.white,
           filled: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
       darkTheme: ThemeData(
@@ -105,9 +105,9 @@ class _UrinalysisAppState extends State<UrinalysisApp> {
         '/history': (context) => HistoryScreen(),
         '/notifications': (context) => const NotificationsScreen(),
         '/settings': (context) => SettingsScreen(
-              darkMode: _darkMode,
-              onDarkModeChanged: _toggleDarkMode,
-            ),
+          darkMode: _darkMode,
+          onDarkModeChanged: _toggleDarkMode,
+        ),
         '/home': (context) => HomeScreen(),
       },
       // Handle screens with parameters dynamically
