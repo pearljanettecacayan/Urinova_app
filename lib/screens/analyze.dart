@@ -8,15 +8,15 @@ import '../components/CustomBottomNavBar.dart';
 import '../helpers/tflite_helper.dart';
 import 'results.dart';
 
-class SymptomsScreen extends StatefulWidget {
+class AnalyzeScreen extends StatefulWidget {
   final File imageFile;
-  const SymptomsScreen({super.key, required this.imageFile});
+  const AnalyzeScreen({super.key, required this.imageFile});
 
   @override
-  _SymptomsScreenState createState() => _SymptomsScreenState();
+  _AnalyzeScreenState createState() => _AnalyzeScreenState();
 }
 
-class _SymptomsScreenState extends State<SymptomsScreen> {
+class _AnalyzeScreenState extends State<AnalyzeScreen> {
   int _selectedIndex = 2;
   late File _imageFile;
   final TFLiteHelper _tfliteHelper = TFLiteHelper();
@@ -24,30 +24,25 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
 
   bool _isLoading = false;
   bool _isModelLoaded = false;
-
-  // Analysis progress tracking
   String _analysisStatus = '';
 
   @override
   void initState() {
     super.initState();
     _imageFile = widget.imageFile;
-    _loadModelInBackground();
+    _loadModel();
   }
 
-  void _loadModelInBackground() async {
+  Future<void> _loadModel() async {
     try {
       setState(() => _analysisStatus = 'Loading AI model...');
       await _tfliteHelper.loadModel();
 
-      if (_tfliteHelper.isLoaded) {
-        if (mounted) {
-          setState(() {
-            _isModelLoaded = true;
-            _analysisStatus = 'Model ready! Tap Analyze to start.';
-          });
-          print('Model loaded successfully');
-        }
+      if (_tfliteHelper.isLoaded && mounted) {
+        setState(() {
+          _isModelLoaded = true;
+          _analysisStatus = 'Model ready! Tap Analyze to start.';
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -59,11 +54,10 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
           ),
         );
       }
-      print('Model loading error: $e');
     }
   }
 
-  Future<void> _analyzeSymptoms() async {
+  Future<void> _analyzeImage() async {
     if (!_isModelLoaded) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -85,109 +79,56 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
       setState(() => _analysisStatus = 'Running AI analysis...');
 
       // Run model inference
-      List<double> results = await tflite_helper.runModel(_imageFile);
+      final modelOutput = await _tfliteHelper.runModel(_imageFile);
 
-      if (results.isEmpty) {
-        throw Exception("Model returned empty results");
+      // Check if analysis succeeded
+      if (modelOutput['success'] != true) {
+        throw Exception(modelOutput['error'] ?? 'Analysis failed');
       }
 
-      print('Model output: $results');
+      // Extract detections
+      final detections =
+          modelOutput['detections'] as List<Map<String, dynamic>>;
+      final inferenceTime = modelOutput['inferenceTime'] as int;
 
-      // Define labels (must match your model's training labels)
-      final labels = ['Possible Dehydrated', 'Normal', 'Possible UTI'];
+      // Find best detection (highest confidence)
+      if (detections.isEmpty) {
+        throw Exception('No objects detected in image');
+      }
 
-      // Get prediction with highest confidence
-      final bestIndex = results.indexOf(
-        results.reduce((a, b) => a > b ? a : b),
+      // Get the detection with highest confidence
+      detections.sort(
+        (a, b) =>
+            (b['confidence'] as double).compareTo(a['confidence'] as double),
       );
-      final bestLabel = labels[bestIndex];
-      final confidence = (results[bestIndex] * 100).toStringAsFixed(2);
 
-      print('Prediction: $bestLabel (${confidence}% confidence)');
-      print('All probabilities:');
-      for (int i = 0; i < labels.length; i++) {
-        print('   ${labels[i]}: ${(results[i] * 100).toStringAsFixed(2)}%');
-      }
+      final bestDetection = detections.first;
+      final bestLabel = bestDetection['class'] as String;
+      final confidenceValue = bestDetection['confidence'] as double;
+      final confidence = confidenceValue.toStringAsFixed(2);
 
-      // Warn if confidence is low
-      final confidenceValue = results[bestIndex] * 100;
+      // Calculate probabilities for all classes
+      Map<String, double> allProbs = {
+        'Possible Dehydrated': 0.0,
+        'Normal': 0.0,
+        'Possible UTI': 0.0,
+      };
 
-      String warningTitle = '';
-      String warningMessage = '';
-
-      if (confidenceValue < 40) {
-        // Very low confidence - likely wrong image
-        warningTitle = 'Invalid Sample Detected';
-        warningMessage =
-            'The AI is only ${confidence}% confident. '
-            'This does not appear to be a urine sample. '
-            'Please capture a proper urine sample for accurate results.';
-      } else if (confidenceValue < 60) {
-        // Low confidence - quality or lighting issue
-        warningTitle = 'Low Confidence Warning';
-        warningMessage =
-            'The AI is only ${confidence}% confident. '
-            'Image quality may be poor or lighting conditions are not optimal. '
-            'Consider retaking the photo with better lighting and focus.';
-      }
-
-      // Show warning dialog if confidence is below threshold
-      if (confidenceValue < 60) {
-        await showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: Text(
-              warningTitle,
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                color: confidenceValue < 40 ? Colors.red : Colors.orange,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  confidenceValue < 40 ? Icons.error : Icons.warning,
-                  color: confidenceValue < 40 ? Colors.red : Colors.orange,
-                  size: 48,
-                ),
-                const SizedBox(height: 12),
-                Text(warningMessage, style: GoogleFonts.poppins(fontSize: 14)),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Go back to capture screen
-                },
-                child: Text(
-                  'Retake Photo',
-                  style: GoogleFonts.poppins(
-                    color: Colors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              if (confidenceValue >=
-                  40) // Only show "Continue" if not extremely low
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Continue Anyway',
-                    style: GoogleFonts.poppins(color: Colors.teal),
-                  ),
-                ),
-            ],
-          ),
-        );
-
-        // If very low confidence and user clicked retake, stop here
-        if (confidenceValue < 40) {
-          setState(() => _isLoading = false);
-          return;
+      // Aggregate confidences by class
+      for (var detection in detections) {
+        final className = detection['class'] as String;
+        final conf = detection['confidence'] as double;
+        if (allProbs.containsKey(className)) {
+          allProbs[className] = allProbs[className]! + conf;
         }
+      }
+
+      // Normalize to 100%
+      final total = allProbs.values.reduce((a, b) => a + b);
+      if (total > 0) {
+        allProbs.forEach((key, value) {
+          allProbs[key] = (value / total) * 100;
+        });
       }
 
       setState(() => _analysisStatus = 'Uploading results...');
@@ -205,31 +146,33 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
           );
 
       final imageUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
-      print('Image uploaded: $imageUrl');
 
       setState(() => _analysisStatus = 'Saving to database...');
 
-      // Save to Firebase
+      // Get current user
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('User not logged in');
       }
 
-      // Save detailed analysis results
+      // Save to Firebase analysis_results
       await FirebaseFirestore.instance.collection('analysis_results').add({
         'userId': user.uid,
         'timestamp': Timestamp.now(),
         'result': bestLabel,
         'confidence': confidence,
         'allProbabilities': {
-          'dehydrated': (results[0] * 100).toStringAsFixed(2),
-          'normal': (results[1] * 100).toStringAsFixed(2),
-          'uti': (results[2] * 100).toStringAsFixed(2),
+          'dehydrated': allProbs['Possible Dehydrated']!.toStringAsFixed(2),
+          'normal': allProbs['Normal']!.toStringAsFixed(2),
+          'uti': allProbs['Possible UTI']!.toStringAsFixed(2),
         },
+        'inferenceTime': inferenceTime,
         'imageUrl': imageUrl,
+        'detectionsCount': detections.length,
+        'segmentationEnabled': true,
       });
 
-      // Save to history (simplified version)
+      // Save to history collection
       final historyRef = FirebaseFirestore.instance.collection('history');
       final existing = await historyRef
           .where('userId', isEqualTo: user.uid)
@@ -261,23 +204,22 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         });
       }
 
-      print('Results saved successfully');
       setState(() => _analysisStatus = 'Analysis complete!');
 
-      // Navigate to results screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ResultsScreen(
-            hydrationResult: bestLabel == 'Normal' ? 'Normal' : bestLabel,
-            utiRisk: bestLabel == 'Possible UTI' ? 'High' : 'Low',
-            confidence: confidence,
+      // Navigate to results
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultsScreen(
+              hydrationResult: bestLabel == 'Normal' ? 'Normal' : bestLabel,
+              utiRisk: bestLabel == 'Possible UTI' ? 'High' : 'Low',
+              confidence: confidence,
+            ),
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
-      print('Analysis error: $e');
-
       setState(() {
         _analysisStatus = 'Analysis failed';
         _isLoading = false;
@@ -292,7 +234,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
             action: SnackBarAction(
               label: 'Retry',
               textColor: Colors.white,
-              onPressed: _analyzeSymptoms,
+              onPressed: _analyzeImage,
             ),
           ),
         );
@@ -302,6 +244,12 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _tfliteHelper.close();
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
@@ -325,12 +273,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
   }
 
   @override
-  void dispose() {
-    _tfliteHelper.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -349,7 +291,6 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             Text(
               "Captured Urine Image",
               style: GoogleFonts.poppins(
@@ -446,7 +387,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                 child: ElevatedButton.icon(
                   onPressed: (!_isModelLoaded || _isLoading)
                       ? null
-                      : _analyzeSymptoms,
+                      : _analyzeImage,
                   icon: _isLoading
                       ? const SizedBox(
                           width: 20,
@@ -465,6 +406,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.grey,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -491,7 +433,7 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'The AI will analyze the image and provide results. Make sure the image is clear and well-lit for best accuracy.',
+                      'The AI will analyze the image using instance segmentation and provide results. Make sure the image is clear and well-lit for best accuracy.',
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: Colors.blue[900],

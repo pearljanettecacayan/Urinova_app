@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as img;
 import '../components/app_drawer.dart';
 import '../components/CustomBottomNavBar.dart';
 import 'analyze.dart';
@@ -20,101 +18,34 @@ class _CaptureScreenState extends State<CaptureScreen> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
-  // Capture image from camera
+  // Capture image from camera (NO blur detection)
   Future<void> _captureImage() async {
     final XFile? captured = await _picker.pickImage(source: ImageSource.camera);
     if (captured == null) return;
 
     final File imageFile = File(captured.path);
-    bool blurry = await compute(_checkBlur, imageFile.path);
+    setState(() => _image = imageFile);
 
-    if (blurry) {
-      _showBlurDialog();
-    } else {
-      setState(() => _image = imageFile);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SymptomsScreen(imageFile: imageFile),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnalyzeScreen(imageFile: imageFile),
+      ),
+    );
   }
 
-  // Upload image from gallery
+  // Upload image from gallery (NO blur detection)
   Future<void> _uploadImage() async {
     final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
 
     final File imageFile = File(picked.path);
-    bool blurry = await compute(_checkBlur, imageFile.path);
+    setState(() => _image = imageFile);
 
-    if (blurry) {
-      _showBlurDialog();
-    } else {
-      setState(() => _image = imageFile);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SymptomsScreen(imageFile: imageFile),
-        ),
-      );
-    }
-  }
-
-  // Optimized blur detection (background isolate)
-  static bool _checkBlur(String path) {
-    try {
-      final file = File(path);
-      final bytes = file.readAsBytesSync();
-      final image = img.decodeImage(bytes);
-      if (image == null) return true;
-
-      // Resize to make analysis 5–10x faster
-      final resized = img.copyResize(image, width: 256);
-      final gray = img.grayscale(resized);
-
-      double sum = 0, sumSq = 0;
-      int count = 0;
-
-      for (int y = 1; y < gray.height - 1; y++) {
-        for (int x = 1; x < gray.width - 1; x++) {
-          final gx =
-              img.getLuminance(gray.getPixel(x + 1, y)) -
-              img.getLuminance(gray.getPixel(x - 1, y));
-          final gy =
-              img.getLuminance(gray.getPixel(x, y + 1)) -
-              img.getLuminance(gray.getPixel(x, y - 1));
-          final v = (gx * gx + gy * gy).toDouble();
-          sum += v;
-          sumSq += v * v;
-          count++;
-        }
-      }
-
-      final mean = sum / count;
-      final variance = (sumSq / count) - (mean * mean);
-
-      // Lower threshold slightly for more accurate detection
-      return variance < 5000;
-    } catch (e) {
-      debugPrint("Error checking blur: $e");
-      return true;
-    }
-  }
-
-  void _showBlurDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Image too blurry"),
-        content: const Text("Please retake or choose a clearer image."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK", style: TextStyle(color: Colors.teal)),
-          ),
-        ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnalyzeScreen(imageFile: imageFile),
       ),
     );
   }
@@ -158,9 +89,8 @@ class _CaptureScreenState extends State<CaptureScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bool isWide = constraints.maxWidth > 800;
-          final double contentWidth = isWide
-              ? 500
-              : constraints.maxWidth * 0.85;
+          final double contentWidth =
+              isWide ? 500 : constraints.maxWidth * 0.85;
 
           return Center(
             child: SingleChildScrollView(
@@ -229,8 +159,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                                 foregroundColor: Colors.teal,
                                 side: const BorderSide(color: Colors.teal),
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                                    vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
