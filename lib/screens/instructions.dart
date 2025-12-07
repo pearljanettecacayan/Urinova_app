@@ -46,7 +46,6 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       drawer: AppDrawer(),
       appBar: AppBar(
@@ -144,16 +143,15 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
             // ▶️ Next Button
             Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minWidth: 200,
-                  maxWidth: 320,
-                ),
+                constraints: const BoxConstraints(minWidth: 200, maxWidth: 320),
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/capture'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 20,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

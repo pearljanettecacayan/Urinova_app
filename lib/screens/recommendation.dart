@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../components/CustomBottomNavBar.dart';
 
 class RecommendationScreen extends StatefulWidget {
@@ -17,45 +18,80 @@ class RecommendationScreen extends StatefulWidget {
 }
 
 class _RecommendationScreenState extends State<RecommendationScreen> {
-  int _selectedIndex = 2; // Index 2 = Capture
-  late List<String> tips;
+  int _selectedIndex = 2;
+  List<String> tips = [];
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _loadRecommendations();
+  }
 
-    tips = [];
+  Future<void> _loadRecommendations() async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      List<String> loadedTips = [];
 
-    // UTI Risk-based tips
-    if (widget.utiRisk.toLowerCase() == 'high') {
-      tips.addAll([
-        'See a doctor as soon as possible.',
-        'Urinate frequently and don’t hold it in.',
-        'Maintain good hygiene after using the toilet.',
-      ]);
-    } else if (widget.utiRisk.toLowerCase() == 'medium') {
-      tips.addAll([
-        'Monitor your symptoms closely.',
-        'Avoid sugary drinks.',
-        'Consult a doctor if symptoms worsen.',
-      ]);
-    } else {
-      tips.addAll([
-        'Maintain proper hygiene.',
-        'Stay aware of your symptoms.',
-      ]);
-    }
+      // Fetch UTI risk recommendations
+      final utiRiskLower = widget.utiRisk.toLowerCase();
+      final utiDoc = await firestore
+          .collection('recommendations')
+          .doc('uti_risks')
+          .get();
 
-    // Hydration-based tips
-    if (widget.hydrationResult.toLowerCase() == 'low') {
-      tips.addAll([
-        'Increase your water intake to stay hydrated.',
-        'Avoid caffeine and alcohol.',
-      ]);
-    } else if (widget.hydrationResult.toLowerCase() == 'moderate') {
-      tips.add('Maintain your current water intake.');
-    } else if (widget.hydrationResult.toLowerCase() == 'high') {
-      tips.add('Keep up your good hydration habits.');
+      if (utiDoc.exists) {
+        final data = utiDoc.data();
+        if (data != null && data.containsKey(utiRiskLower)) {
+          final riskData = data[utiRiskLower];
+          if (riskData is String) {
+            // Split the string by comma and clean up
+            loadedTips.addAll(
+              riskData
+                  .split(',')
+                  .map((tip) => tip.trim())
+                  .where((tip) => tip.isNotEmpty),
+            );
+          } else if (riskData is List) {
+            loadedTips.addAll(riskData.cast<String>());
+          }
+        }
+      }
+
+      // Fetch hydration recommendations
+      final hydrationLower = widget.hydrationResult.toLowerCase();
+      final hydrationDoc = await firestore
+          .collection('recommendations')
+          .doc('hydration')
+          .get();
+
+      if (hydrationDoc.exists) {
+        final data = hydrationDoc.data();
+        if (data != null && data.containsKey(hydrationLower)) {
+          final hydrationData = data[hydrationLower];
+          if (hydrationData is String) {
+            loadedTips.addAll(
+              hydrationData
+                  .split(',')
+                  .map((tip) => tip.trim())
+                  .where((tip) => tip.isNotEmpty),
+            );
+          } else if (hydrationData is List) {
+            loadedTips.addAll(hydrationData.cast<String>());
+          }
+        }
+      }
+
+      setState(() {
+        tips = loadedTips;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Failed to load recommendations: $e';
+        isLoading = false;
+      });
     }
   }
 
@@ -72,7 +108,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         Navigator.pushNamed(context, '/instructions');
         break;
       case 2:
-        break; // Already on this screen
+        break;
       case 3:
         Navigator.pushNamed(context, '/profile');
         break;
@@ -93,64 +129,120 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Personalized Health Tips:',
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal[800],
-              ),
-            ),
-            const SizedBox(height: 16),
-            ...tips.map(
-              (tip) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+          : errorMessage != null
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.check, size: 20, color: Colors.teal),
-                    const SizedBox(width: 8),
-                    Expanded(
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isLoading = true;
+                          errorMessage = null;
+                        });
+                        _loadRecommendations();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                      ),
                       child: Text(
-                        tip,
-                        style: GoogleFonts.poppins(fontSize: 16),
+                        'Retry',
+                        style: GoogleFonts.poppins(color: Colors.white),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/home',
-                  (route) => false,
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Personalized Health Tips:',
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal[800],
+                    ),
                   ),
-                ),
-                child: Text(
-                  'Done',
-                  style: GoogleFonts.poppins(
-                      fontSize: 18, color: Colors.white),
-                ),
+                  const SizedBox(height: 16),
+                  if (tips.isEmpty)
+                    Text(
+                      'No recommendations available.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                    )
+                  else
+                    ...tips.map(
+                      (tip) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.check,
+                              size: 20,
+                              color: Colors.teal,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                tip,
+                                style: GoogleFonts.poppins(fontSize: 16),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/home',
+                        (route) => false,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Done',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,

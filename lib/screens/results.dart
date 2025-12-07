@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../components/CustomBottomNavBar.dart';
 import 'recommendation.dart';
@@ -106,24 +107,30 @@ class _ResultsScreenState extends State<ResultsScreen> {
               'UTI Risk',
               widget.utiRisk,
               widget.confidence,
-              Icons.warning_amber,
+              MdiIcons.alertCircleOutline,
               Colors.green,
             ),
             const SizedBox(height: 16),
-            RichText(
-              text: TextSpan(
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.redAccent,
-                ),
+            // Info Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              ),
+              child: Row(
                 children: [
-                  TextSpan(
-                    text: "Note: ",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const TextSpan(
-                    text:
-                        "This is for early screening only, not a final diagnosis. Please consult a healthcare professional if symptoms persist or worsen.",
+                  const Icon(Icons.info_outline, color: Colors.blue, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'This application serves as a screening tool only and is not intended for diagnostic purposes. Consult a professional for clinical decisions.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.blue[900],
+                      ),
+                    ),
                   ),
                 ],
               ),

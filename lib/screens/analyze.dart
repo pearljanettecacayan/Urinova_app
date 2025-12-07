@@ -41,7 +41,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       if (_tfliteHelper.isLoaded && mounted) {
         setState(() {
           _isModelLoaded = true;
-          _analysisStatus = 'Model ready! Tap Analyze to start.';
+          _analysisStatus = 'Tap Analyze to start.';
         });
       }
     } catch (e) {
@@ -147,7 +147,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
       final imageUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
 
-      setState(() => _analysisStatus = 'Saving to database...');
+      setState(() => _analysisStatus = 'Saving Results...');
 
       // Get current user
       final user = FirebaseAuth.instance.currentUser;
@@ -418,31 +418,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             ),
 
             const SizedBox(height: 24),
-
-            // Info Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: Colors.blue, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'The AI will analyze the image using instance segmentation and provide results. Make sure the image is clear and well-lit for best accuracy.',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.blue[900],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

@@ -99,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,12 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal[900],
+                      color: Colors.teal[800],
                     ),
                   ),
             const SizedBox(height: 8),
             Text(
-              "Welcome back! Here's your health overview today.",
+              "Welcome to Urinova! Here's your health overview today.",
               style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700]),
             ),
             const SizedBox(height: 24),
@@ -246,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 5),
 
-            // 🔎 INSPECTION SECTION
+            //INSPECTION SECTION
             _buildSection(
               title: "Inspection",
               icon: Icons.water_drop_outlined,
@@ -263,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 24),
 
-            // 📰 Health Articles
+            //Health Articles
             Text(
               "Health Articles",
               style: GoogleFonts.poppins(
