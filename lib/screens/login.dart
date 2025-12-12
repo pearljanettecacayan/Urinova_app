@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen>
   late AnimationController _controller;
 
   bool _loading = false;
-  bool _obscurePassword = true; // <-- password visibility state
+  bool _obscurePassword = true; // password visibility
 
   Future<void> _login(BuildContext context) async {
     final email = emailController.text.trim();

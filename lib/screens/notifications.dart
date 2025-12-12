@@ -50,10 +50,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         .where('read', isEqualTo: false)
         .snapshots()
         .listen((snapshot) {
-      setState(() {
-        _hasUnread = snapshot.docs.isNotEmpty;
-      });
-    });
+          setState(() {
+            _hasUnread = snapshot.docs.isNotEmpty;
+          });
+        });
   }
 
   Stream<QuerySnapshot> _notificationStream() {
@@ -139,8 +139,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             return Center(
               child: Text(
                 "No notifications yet.",
-                style:
-                    GoogleFonts.poppins(fontSize: 16, color: Colors.grey[700]),
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                ),
               ),
             );
           }
@@ -175,7 +177,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     leading: Icon(
                       Icons.notifications_active_rounded,
                       color: isRead ? Colors.grey : Colors.teal,
@@ -185,8 +189,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       data['title'] ?? 'Notification',
                       style: GoogleFonts.poppins(
                         fontSize: 16,
-                        fontWeight:
-                            isRead ? FontWeight.w500 : FontWeight.w700,
+                        fontWeight: isRead ? FontWeight.w500 : FontWeight.w700,
                         color: Colors.black87,
                       ),
                     ),
@@ -205,7 +208,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   /// Popup for full notification details
-  void _showNotificationDialog(BuildContext context, Map<String, dynamic> data) {
+  void _showNotificationDialog(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) {
     showDialog(
       context: context,
       builder: (context) {
@@ -241,8 +247,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  (data['message'] ?? 'No details available.')
-                      .replaceAll(r'\n', '\n'),
+                  (data['message'] ?? 'No details available.').replaceAll(
+                    r'\n',
+                    '\n',
+                  ),
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 15,
@@ -271,7 +279,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                     child: Text(
                       'Close',

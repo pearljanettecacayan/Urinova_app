@@ -12,12 +12,18 @@ class InstructionsScreen extends StatefulWidget {
 
 class _InstructionsScreenState extends State<InstructionsScreen> {
   final List<String> steps = [
-    'Prepare a clean, transparent container.',
-    'Collect a fresh midstream urine sample.',
-    'Place it on a clean background under good lighting (natural light is best).',
-    'Avoid shadows or colored lighting, as they may affect color detection.',
-    'Open the app and go to the Capture section.',
-    'Align the camera and take a clear photo.',
+    'Prepare a clean, transparent container shown above.',
+    'Collect a fresh midstream urine sample (discard the first portion, collect the middle stream).',
+    'Fill the container to about half-full, then securely close with the cap.',
+    'Place the container on a flat, clean surface with a neutral background (white, light gray, or beige).',
+    'Use natural daylight or bright light. Avoid direct sunlight, shadows, or colored/yellow lighting.',
+    'Hold your phone about 15-20cm (one hand-span) away so the whole container is visible on your screen.',
+    'Ensure the camera is steady - rest your elbows on the table or use a phone stand if available.',
+    'The urine color should be clearly visible through the transparent container.',
+    'Take the photo when the image well-focused.',
+    'Review the captured image - the container should be centered',
+    'make sure its clear and the urine color is visible.',
+    'If the image is blurry, too dark, or has strong shadows, retake the photo.',
   ];
 
   int _selectedIndex = 1;
@@ -93,7 +99,7 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
-                  'assets/images/clean_container.png', // actual image path
+                  'assets/images/clean_container.png',
                   height: 180,
                   width: double.infinity,
                   fit: BoxFit.contain,
@@ -102,7 +108,7 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
             ),
             const SizedBox(height: 24),
 
-            // 🧾 Title
+            // Steps to follow
             Text(
               'Follow these steps:',
               style: GoogleFonts.poppins(
@@ -114,7 +120,7 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
 
             const SizedBox(height: 16),
 
-            // ✅ Step List
+            // Step List
             ...steps.map(
               (step) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -140,7 +146,7 @@ class _InstructionsScreenState extends State<InstructionsScreen> {
 
             const SizedBox(height: 40),
 
-            // ▶️ Next Button
+            // Next Button
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minWidth: 200, maxWidth: 320),

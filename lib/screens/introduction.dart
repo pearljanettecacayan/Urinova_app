@@ -94,7 +94,7 @@ class _IntroductionScreenState extends State<IntroductionScreen>
 
                         const SizedBox(height: 12),
                         Text(
-                          'Screening for UTI and dehydration using only your phone.',
+                          'Screening for UTI and dehydration using your phone.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.spaceMono(
                             fontSize: 16,

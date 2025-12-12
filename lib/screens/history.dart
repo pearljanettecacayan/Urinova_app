@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
-  // Helper to convert month number to name
+  // Convert month number to name
   String _getMonthName(int month) {
     const monthNames = [
       'January',

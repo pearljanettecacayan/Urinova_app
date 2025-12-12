@@ -46,7 +46,6 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         if (data != null && data.containsKey(utiRiskLower)) {
           final riskData = data[utiRiskLower];
           if (riskData is String) {
-            // Split the string by comma and clean up
             loadedTips.addAll(
               riskData
                   .split(',')
@@ -96,9 +95,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
 
     switch (index) {
       case 0:
@@ -106,8 +103,6 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         break;
       case 1:
         Navigator.pushNamed(context, '/instructions');
-        break;
-      case 2:
         break;
       case 3:
         Navigator.pushNamed(context, '/profile');

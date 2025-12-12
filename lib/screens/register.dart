@@ -19,8 +19,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       TextEditingController();
 
   bool _loading = false;
-
-  // state for toggle password visibility
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -67,15 +65,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .collection('users')
           .doc(userCred.user!.uid)
           .set({
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+            'name': name,
+            'email': email,
+            'phone': phone,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
 
-      _showAlert('Account created successfully!', onOk: () {
-        Navigator.pushNamed(context, '/introduction');
-      });
+      _showAlert(
+        'Account created successfully!',
+        onOk: () {
+          Navigator.pushNamed(context, '/introduction');
+        },
+      );
     } on FirebaseAuthException catch (e) {
       _showAlert(e.message ?? 'Registration failed.');
     } catch (e) {
@@ -90,8 +91,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Notice',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Notice',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
         content: Text(message, style: GoogleFonts.poppins()),
         actions: [
           TextButton(
@@ -110,8 +113,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity, // full width
-        height: double.infinity, // full height
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFa8edea), Color(0xFFfed6e3)],
@@ -125,8 +128,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 400),
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 40,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -174,20 +179,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         'Create a password',
                         passwordController,
                         obscureText: _obscurePassword,
-                        toggleObscure: () {
-                          setState(() =>
-                              _obscurePassword = !_obscurePassword);
-                        },
+                        toggleObscure: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                       _buildTextField(
                         'Confirm Password',
                         'Re-enter your password',
                         confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
-                        toggleObscure: () {
-                          setState(() => _obscureConfirmPassword =
-                              !_obscureConfirmPassword);
-                        },
+                        toggleObscure: () => setState(
+                          () => _obscureConfirmPassword =
+                              !_obscureConfirmPassword,
+                        ),
                       ),
                       const SizedBox(height: 32),
                       SizedBox(
@@ -203,11 +207,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           child: _loading
                               ? const CircularProgressIndicator(
-                                  color: Colors.white)
+                                  color: Colors.white,
+                                )
                               : Text(
                                   'Create Account',
                                   style: GoogleFonts.poppins(
-                                      fontSize: 18, color: Colors.white),
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
                                 ),
                         ),
                       ),
@@ -217,8 +224,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onPressed: () => Navigator.pop(context),
                           child: Text(
                             'Back to Login',
-                            style:
-                                GoogleFonts.poppins(color: Colors.teal[700]),
+                            style: GoogleFonts.poppins(color: Colors.teal[700]),
                           ),
                         ),
                       ),
@@ -233,7 +239,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // modified _buildTextField with toggle support
   Widget _buildTextField(
     String label,
     String hint,
@@ -263,9 +268,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ? null
                   : IconButton(
                       icon: Icon(
-                        obscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        obscureText ? Icons.visibility_off : Icons.visibility,
                       ),
                       onPressed: toggleObscure,
                     ),

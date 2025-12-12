@@ -73,11 +73,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           .from('profile_pics')
           .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
 
-      final publicUrl = Supabase.instance.client.storage
+      return Supabase.instance.client.storage
           .from('profile_pics')
           .getPublicUrl(fileName);
-
-      return publicUrl;
     } catch (e) {
       print("Upload error: $e");
       return null;
@@ -142,9 +140,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         actions: [
           TextButton(
             child: Text("OK", style: GoogleFonts.poppins(color: Colors.teal)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),
@@ -168,8 +164,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         Navigator.pushReplacementNamed(context, '/notifications');
         break;
       case 4:
-
-        /// Already on profile
+        // Already on profile
         break;
     }
   }

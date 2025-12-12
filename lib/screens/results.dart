@@ -50,10 +50,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
           _image = frame.image;
           _loaded = true;
         });
-        print('✅ Image loaded: ${frame.image.width}x${frame.image.height}');
+        print('Image loaded: ${frame.image.width}x${frame.image.height}');
       }
     } catch (e) {
-      print('❌ Error: $e');
+      print('Error: $e');
     }
   }
 
@@ -272,10 +272,10 @@ class PolygonOnlyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     print('═══════════════════════════════════════════════════');
-    print('🎨 PAINT METHOD CALLED');
-    print('📊 Canvas size: ${size.width}x${size.height}');
-    print('🖼️ Image size: ${image.width}x${image.height}');
-    print('🔍 Detections count: ${detections.length}');
+    print(' PAINT METHOD CALLED');
+    print(' Canvas size: ${size.width}x${size.height}');
+    print(' Image size: ${image.width}x${image.height}');
+    print(' Detections count: ${detections.length}');
 
     // 1. Draw the image
     paintImage(
@@ -315,21 +315,21 @@ class PolygonOnlyPainter extends CustomPainter {
       final polygon = det['polygon'];
 
       if (polygon == null) {
-        print('   ❌ Polygon is NULL');
+        print('Polygon is NULL');
         continue;
       }
 
       if (polygon is! List) {
-        print('   ❌ Polygon is not a List, it is: ${polygon.runtimeType}');
+        print('Polygon is not a List, it is: ${polygon.runtimeType}');
         continue;
       }
 
       if (polygon.isEmpty) {
-        print('   ⚠️ Polygon is EMPTY');
+        print('Polygon is EMPTY');
         continue;
       }
 
-      print('   ✅ Polygon has ${polygon.length} points');
+      print('Polygon has ${polygon.length} points');
 
       // Print first 3 points for debugging
       for (int j = 0; j < 3 && j < polygon.length; j++) {
@@ -350,7 +350,7 @@ class PolygonOnlyPainter extends CustomPainter {
         lineColor = Colors.blue;
       }
 
-      print('   🎨 Drawing with color: $lineColor');
+      print('Drawing with color: $lineColor');
 
       // Build path
       final path = Path();
@@ -367,7 +367,7 @@ class PolygonOnlyPainter extends CustomPainter {
         }
 
         if (x == null || y == null) {
-          print('   ⚠️ Invalid point: $point');
+          print('Invalid point: $point');
           continue;
         }
 
@@ -377,7 +377,7 @@ class PolygonOnlyPainter extends CustomPainter {
 
         if (first) {
           path.moveTo(canvasX, canvasY);
-          print('   📍 Start: ($canvasX, $canvasY)');
+          print('Start: ($canvasX, $canvasY)');
           first = false;
         } else {
           path.lineTo(canvasX, canvasY);
@@ -387,7 +387,7 @@ class PolygonOnlyPainter extends CustomPainter {
 
       path.close();
 
-      print('   ✅ Drew polygon with $validPoints valid points');
+      print('Drew polygon with $validPoints valid points');
 
       // Draw the path with VERY thick line
       final paint = Paint()
@@ -407,7 +407,7 @@ class PolygonOnlyPainter extends CustomPainter {
 
       canvas.drawPath(path, fillPaint);
 
-      print('   ✅ Polygon drawn successfully!');
+      print('Polygon drawn successfully!');
     }
 
     print('═══════════════════════════════════════════════════');
@@ -416,7 +416,7 @@ class PolygonOnlyPainter extends CustomPainter {
   @override
   bool shouldRepaint(PolygonOnlyPainter old) {
     final shouldRepaint = old.image != image || old.detections != detections;
-    print('🔄 shouldRepaint: $shouldRepaint');
+    print('shouldRepaint: $shouldRepaint');
     return shouldRepaint;
   }
 }

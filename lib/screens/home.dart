@@ -20,24 +20,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Map<String, String>> articles = [
     {
-      "title": "Understanding Urine Color: What It Means",
+      "title": "Frequent Urination",
       "content":
-          "Urine color can indicate your hydration and health. Light yellow usually means well-hydrated, dark yellow can suggest dehydration, while red or cloudy urine may signal possible infection or other health issues.",
+          "One of the most common UTI symptoms is feeling the need to urinate more often than usual, even when little urine comes out. This happens because bacteria irritate the bladder lining.",
     },
     {
-      "title": "UTI Symptoms You Shouldn't Ignore",
+      "title": "Burning Sensation During Urination",
       "content":
-          "Common UTI symptoms include frequent urination, burning sensation when peeing, cloudy urine, and lower abdominal pain. If symptoms persist, consult a doctor immediately.",
+          "A painful, burning feeling when urinating is a classic UTI symptom. This occurs due to inflammation in the urinary tract caused by bacterial infection.",
     },
     {
-      "title": "Tips to Stay Hydrated Every Day",
+      "title": "Cloudy or Strong-Smelling Urine",
       "content":
-          "Drink at least 8 glasses of water daily. Include fruits and vegetables in your diet, and avoid excessive caffeine or alcohol which may cause dehydration.",
+          "UTI can cause urine to appear cloudy, murky, or have an unusually strong, unpleasant odor. This is often due to the presence of bacteria, pus, or blood in the urine.",
     },
     {
-      "title": "Early Screening of Dehydration in Children",
+      "title": "Lower Abdominal or Pelvic Pain",
       "content":
-          "Watch out for signs like dry mouth, no tears when crying, sunken eyes, and decreased urination. Early hydration is key to preventing serious complications.",
+          "Many people with UTI experience discomfort, pressure, or cramping in the lower abdomen or pelvic area. This pain may worsen when urinating or after emptying the bladder.",
+    },
+    {
+      "title": "Blood in Urine (Hematuria)",
+      "content":
+          "Urine that appears pink, red, or cola-colored may indicate blood presence, a serious UTI symptom. If you notice blood in your urine, seek medical attention immediately.",
+    },
+    {
+      "title": "Feeling of Incomplete Bladder Emptying",
+      "content":
+          "UTI can create a persistent feeling that your bladder is not completely empty even right after urination. This uncomfortable sensation is caused by bladder inflammation.",
+    },
+    {
+      "title": "Fever and Chills",
+      "content":
+          "When UTI spreads to the kidneys, it may cause fever, chills, nausea, and back pain. These are signs of a more serious infection requiring immediate medical attention.",
+    },
+    {
+      "title": "Dehydration Symptoms",
+      "content":
+          "Signs of dehydration include excessive thirst, dry mouth, dizziness, fatigue, and dark yellow urine. Severe dehydration can cause confusion, rapid heartbeat, and decreased urination. Stay hydrated and seek medical help if symptoms persist.",
     },
   ];
 
@@ -174,15 +194,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
               elevation: 3,
               child: ExpansionTile(
-                leading: const Icon(Icons.info_outline, color: Colors.teal),
-                title: Text("Urine Overview", style: GoogleFonts.poppins()),
+                title: Text("Introduction", style: GoogleFonts.poppins()),
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -190,8 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Urine is a biological fluid that reflects the body's metabolic state and kidney function. "
-                          "It serves as an important diagnostic indicator for dehydration, urinary tract infection (UTI), and other health conditions.",
+                          "The color of urine is a vital indicator of hydration levels and potential infections, making urinalysis an essential tool in health monitoring. However, traditional urinalysis methods often require clinical or hospital visits, posing challenges for continuous monitoring, especially for individuals in remote areas and those with mobility impairments.",
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             color:
@@ -212,27 +229,54 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "Traditionally, urine tests require laboratory equipment, but recent advancements in Artificial Intelligence (AI) "
-                          "have introduced smartphone-based urinalysis that can detect early signs of dehydration and UTI by analyzing urine color and appearance (Chen et al., 2020; Li & Wang, 2021).",
-                          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                          "The healthcare and medical field is one of the many industries that have seen considerable change due to the quick development of mobile technology and artificial intelligence (AI). Innovative technologies that improve the accuracy and efficiency of illness identification and monitoring have been established by integrating AI-assisted image processing into medical diagnostics.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                            height: 1.5,
+                          ),
                           textAlign: TextAlign.justify,
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "When the body becomes dehydrated, urine turns darker due to higher solute concentration. "
-                          "AI models trained on urine images can classify color intensity to estimate hydration levels with high accuracy (Nguyen et al., 2022). "
-                          "Meanwhile, UTI-related infections can cause cloudy or reddish discoloration due to bacteria, pus, or blood, "
-                          "which image processing algorithms can detect through color and texture pattern analysis (Patel et al., 2023).",
-                          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                          "Smart-assisted AI urinalysis is one prominent use of this technology that decreases the need for frequent clinical visits and increases accessibility to necessary health screenings by allowing people to perform routine urine tests at home. Recent studies have explored the feasibility of smartphone-based urinalysis using AI-powered image recognition techniques.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                            height: 1.5,
+                          ),
                           textAlign: TextAlign.justify,
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "This innovative approach enables early screening using only a smartphone camera, "
-                          "making health monitoring more accessible and affordable for communities without laboratory access. "
-                          "Such systems combine AI-driven image classification and data analytics to provide users with instant, interpretable results, "
-                          "helping promote proactive health management and preventive care (World Health Organization, 2022).",
-                          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+                          "Smartphone cameras can be used to detect color changes, transforming them into reliable diagnostic tools for UTI detection. By applying comprehensive color normalization techniques, smartphone-based systems can correct for variations in lighting and device hardware, making it possible to obtain accurate color readings even in uncontrolled environments.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.justify,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "These systems image urine with a smartphone camera and use machine-learning algorithms to identify UTI and dehydration-associated biomarkers. This innovative approach enables early screening using only a smartphone camera, making health monitoring more accessible and affordable for communities without laboratory access.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                            height: 1.5,
+                          ),
                           textAlign: TextAlign.justify,
                         ),
                         const SizedBox(height: 12),
@@ -245,26 +289,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 5),
 
-            //INSPECTION SECTION
+            //System Overview & Limitations section
             _buildSection(
-              title: "Inspection",
-              icon: Icons.water_drop_outlined,
+              title: "System Overview & Limitations",
               content: [
-                "Inspection involves visual assessment of urine’s color, symptoms,  clarity, and odor. These characteristics indicate hydration status and possible infection.",
-                "Color: Pale yellow signifies good hydration. Dark yellow or amber may suggest dehydration. Red or cloudy urine may indicate infection or the presence of blood cells.",
-                "Symptoms: UTI symptoms include frequent urination, burning sensation, cloudy urine, and lower abdominal pain. Dehydration symptoms include excessive thirst, dry mouth, dizziness, and dark yellow urine.",
-                "Clarity: Clear urine is normal. Cloudy urine may indicate bacterial presence or pus (common in UTI).",
-                "Odor: A strong, foul odor may indicate infection or dehydration.",
-                "AI-powered urinalysis can digitize these indicators, enabling early detection and objective evaluation outside clinical laboratories.",
+                "This AI-powered system analyzes urine color and turbidity from captured images for preliminary screening of possible UTI indicators and dehydration, without requiring chemical strips.",
+                "Designed with user accessibility in mind, the mobile application features an intuitive interface suitable for elderly and non-tech-savvy users, with minimal input requirements and integration capabilities for healthcare platforms.",
+                "Limitations:",
+                "Image Quality: Accuracy depends on smartphone camera quality, lighting conditions, and image capture quality.",
+                "Diagnostic Scope: Focuses only on visual analysis of urine color and turbidity. Does not replace laboratory tests or medical consultations.",
+                "Device Compatibility: Performance may vary across different smartphone models due to camera quality and processing power differences.",
+                "Semi-Automation: Urine collection and image capture are manual processes performed by users.",
+                "External Factors: Does not account for medications, diet, or menstrual cycle that may affect urine color.",
+                "Despite these limitations, this study contributes to AI-powered health screening by improving accessibility, efficiency, and early health awareness.",
+                "Disclaimer: This is a preliminary screening tool only. Seek professional medical attention for confirmation, diagnosis, and treatment of any abnormal results or symptoms.",
               ],
-              image: "assets/images/inspection_urine.jpg",
             ),
 
             const SizedBox(height: 24),
 
-            //Health Articles
+            // Sypmtoms
             Text(
-              "Health Articles",
+              "Symptoms",
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -306,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // 🔹 Reusable Section
   Widget _buildSection({
     required String title,
-    required IconData icon,
+    IconData? icon,
     required List<String> content,
     String? image,
   }) {
@@ -314,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
       child: ExpansionTile(
-        leading: Icon(icon, color: Colors.teal),
+        leading: icon != null ? Icon(icon, color: Colors.teal) : null,
         title: Text(title, style: GoogleFonts.poppins()),
         children: [
           Padding(

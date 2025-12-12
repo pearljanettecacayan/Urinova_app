@@ -29,11 +29,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/capture');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/notifications'); 
+        Navigator.pushReplacementNamed(context, '/notifications');
         break;
       case 4:
-
-        /// Already on profile
+        // Already on profile
         break;
     }
   }

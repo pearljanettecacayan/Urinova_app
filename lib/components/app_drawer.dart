@@ -64,7 +64,6 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.history),
             title: const Text('History'),
@@ -79,7 +78,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.logout),
             title: const Text('Log Out'),
             onTap: () async {
-              Navigator.pop(context); // Close drawer immediately
+              Navigator.pop(context);
 
               // Sign out asynchronously
               await FirebaseAuth.instance.signOut();

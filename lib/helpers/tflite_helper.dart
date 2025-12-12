@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
+/// Handles YOLO11m-seg model for urine analysis
 class TFLiteHelper {
   static final TFLiteHelper _instance = TFLiteHelper._internal();
   factory TFLiteHelper() => _instance;
@@ -14,20 +15,21 @@ class TFLiteHelper {
 
   bool get isLoaded => _interpreter != null;
 
+  /// Load model and labels from assets
   Future loadModel() async {
     try {
-      print('🔄 Loading model...');
+      print('Loading model...');
       _interpreter = await Interpreter.fromAsset(
         'assets/models/best_float32.tflite',
         options: InterpreterOptions()..threads = 4,
       );
 
-      // Print input/output shapes for debugging
-      print('✅ Model loaded successfully');
-      print('📥 Input shape: ${_interpreter!.getInputTensor(0).shape}');
-      print('📤 Output 0 shape: ${_interpreter!.getOutputTensor(0).shape}');
-      print('📤 Output 1 shape: ${_interpreter!.getOutputTensor(1).shape}');
+      print('Model loaded successfully');
+      print('Input shape: ${_interpreter!.getInputTensor(0).shape}');
+      print('Output 0 shape: ${_interpreter!.getOutputTensor(0).shape}');
+      print('Output 1 shape: ${_interpreter!.getOutputTensor(1).shape}');
 
+      // Load class names
       final labelData = await rootBundle.loadString('assets/models/labels.txt');
       _labels = labelData
           .split('\n')
@@ -35,13 +37,14 @@ class TFLiteHelper {
           .map((e) => e.trim())
           .toList();
 
-      print('🏷️ Labels loaded: $_labels');
+      print('Labels loaded: $_labels');
     } catch (e) {
-      print('❌ Error loading model: $e');
+      print('Error loading model: $e');
       rethrow;
     }
   }
 
+  /// Run model on image, returns detections with masks
   Future<Map<String, dynamic>> runModel(File imageFile) async {
     if (_interpreter == null) {
       throw Exception('Model not loaded');
@@ -54,12 +57,12 @@ class TFLiteHelper {
 
       final origWidth = image.width;
       final origHeight = image.height;
-      print('📸 Original image: ${origWidth}x$origHeight');
+      print('Original image: ${origWidth}x$origHeight');
 
-      // Resize to 640x640
+      // Resize to 640x640 for model input
       final resized = img.copyResize(image, width: 640, height: 640);
 
-      // Prepare input [1, 640, 640, 3]
+      // Prepare input: normalize pixels to 0-1
       var input = List.generate(
         1,
         (_) => List.generate(
@@ -71,14 +74,14 @@ class TFLiteHelper {
         ),
       );
 
-      // Prepare outputs based on TFLite conversion
-      // TFLite converts the model to different output format:
-      // Output 0: [1, 39, 8400] becomes transposed
-      // Output 1: [1, 32, 160, 160] becomes [1, 160, 160, 32]
+      // Prepare outputs
+      // Output 0: [1, 39, 8400] - box coords + class scores + mask coeffs
       var output0 = List.generate(
         1,
         (_) => List.generate(39, (_) => List.filled(8400, 0.0)),
       );
+
+      // Output 1: [1, 160, 160, 32] - mask prototypes
       var output1 = List.generate(
         1,
         (_) => List.generate(
@@ -94,28 +97,15 @@ class TFLiteHelper {
       _interpreter!.runForMultipleInputs([input], outputs);
       final inferenceTime = DateTime.now().difference(startTime).inMilliseconds;
 
-      print('⚡ Inference completed in ${inferenceTime}ms');
+      print('Inference completed in ${inferenceTime}ms');
 
-      // CRITICAL: Transpose output0 from [1, 39, 8400] to [39, 8400]
-      // YOLOv11 outputs are channel-first, we need to transpose them
+      // Reshape for easier processing: [1, 39, 8400] → [39, 8400]
       List<List<double>> transposedOutput = List.generate(
         39,
         (i) => List.generate(8400, (j) => output0[0][i][j]),
       );
 
-      print(
-        '📊 Transposed output shape: [${transposedOutput.length}, ${transposedOutput[0].length}]',
-      );
-
-      // Debug: Check first detection values
-      print('🔍 Sample detection 0:');
-      print('   cx=${transposedOutput[0][0]}, cy=${transposedOutput[1][0]}');
-      print('   w=${transposedOutput[2][0]}, h=${transposedOutput[3][0]}');
-      print(
-        '   scores=[${transposedOutput[4][0].toStringAsFixed(3)}, ${transposedOutput[5][0].toStringAsFixed(3)}, ${transposedOutput[6][0].toStringAsFixed(3)}]',
-      );
-
-      // Parse detections
+      // Parse and filter detections
       final detections = _parseDetections(
         transposedOutput,
         output1[0],
@@ -123,7 +113,7 @@ class TFLiteHelper {
         origHeight,
       );
 
-      print('🎯 Found ${detections.length} detections after NMS');
+      print('Found ${detections.length} detections after filtering');
 
       return {
         'success': true,
@@ -132,11 +122,12 @@ class TFLiteHelper {
         'imageSize': {'width': origWidth, 'height': origHeight},
       };
     } catch (e) {
-      print('❌ Error running model: $e');
+      print('Error running model: $e');
       return {'success': false, 'error': e.toString(), 'detections': []};
     }
   }
 
+  /// Parse detections and apply NMS filtering
   List<Map<String, dynamic>> _parseDetections(
     List<List<double>> detections,
     List<List<List<double>>> maskProtos,
@@ -144,18 +135,16 @@ class TFLiteHelper {
     int origHeight,
   ) {
     List<Map<String, dynamic>> results = [];
+    print('Parsing ${detections[0].length} raw detections...');
 
-    print('🔍 Parsing ${detections[0].length} raw detections...');
-
-    int validDetections = 0;
     for (int i = 0; i < detections[0].length; i++) {
-      // YOLOv11 outputs NORMALIZED coordinates (0-1 range)
+      // Extract box: center x, center y, width, height (normalized 0-1)
       double cx = detections[0][i];
       double cy = detections[1][i];
       double w = detections[2][i];
       double h = detections[3][i];
 
-      // Get class scores (indices 4, 5, 6)
+      // Extract class scores
       List<double> scores = [
         detections[4][i],
         detections[5][i],
@@ -165,32 +154,15 @@ class TFLiteHelper {
       double maxScore = scores.reduce(max);
       int classIdx = scores.indexOf(maxScore);
 
-      // Only keep detections with confidence > 50%
+      // Keep only confident detections (>50%)
       if (maxScore > 0.5) {
-        validDetections++;
-        if (validDetections <= 3) {
-          print(
-            '✅ Detection #$validDetections: scores=${scores.map((s) => s.toStringAsFixed(3)).toList()}, maxScore=${maxScore.toStringAsFixed(3)} at index $classIdx',
-          );
-        }
-
-        // Get mask coefficients (indices 7-38, total 32 coefficients)
+        // Extract 32 mask coefficients
         List<double> maskCoeffs = [];
-        for (int j = 7; j < 39 && j < detections.length; j++) {
-          if (i < detections[j].length) {
-            maskCoeffs.add(detections[j][i]);
-          }
+        for (int j = 7; j < 39; j++) {
+          maskCoeffs.add(detections[j][i]);
         }
 
-        // Ensure we have exactly 32 coefficients
-        while (maskCoeffs.length < 32) {
-          maskCoeffs.add(0.0);
-        }
-        if (maskCoeffs.length > 32) {
-          maskCoeffs = maskCoeffs.sublist(0, 32);
-        }
-
-        // ✅ FIXED: Coordinates are ALREADY normalized (0-1), just multiply by image dimensions
+        // Convert to pixel coordinates
         double x1 = ((cx - w / 2) * origWidth).clamp(0.0, origWidth.toDouble());
         double y1 = ((cy - h / 2) * origHeight).clamp(
           0.0,
@@ -206,15 +178,7 @@ class TFLiteHelper {
             ? _labels[classIdx]
             : 'Unknown';
 
-        print(
-          '✅ Detection: $className (${(maxScore * 100).toStringAsFixed(1)}%)',
-        );
-        print('   Raw: cx=$cx, cy=$cy, w=$w, h=$h');
-        print(
-          '   BBox: (${x1.toInt()},${y1.toInt()}) to (${x2.toInt()},${y2.toInt()})',
-        );
-
-        // Generate polygon from mask
+        // Generate mask polygon
         final polygon = _generatePolygon(
           maskCoeffs,
           maskProtos,
@@ -225,8 +189,6 @@ class TFLiteHelper {
           origWidth,
           origHeight,
         );
-
-        print('   Polygon: ${polygon.length} points');
 
         results.add({
           'bbox': {
@@ -246,7 +208,7 @@ class TFLiteHelper {
       }
     }
 
-    // Apply NMS (Non-Maximum Suppression)
+    // Remove overlapping detections (NMS)
     results.sort(
       (a, b) =>
           (b['confidence'] as double).compareTo(a['confidence'] as double),
@@ -264,6 +226,7 @@ class TFLiteHelper {
     return kept;
   }
 
+  /// Generate polygon from mask coefficients
   List<Map<String, double>> _generatePolygon(
     List<double> coeffs,
     List<List<List<double>>> protos,
@@ -276,35 +239,29 @@ class TFLiteHelper {
   ) {
     const int maskSize = 160;
 
-    print('🎨 Generating mask polygon...');
-    print(
-      '🎯 BBOX: (${x1.toInt()},${y1.toInt()}) to (${x2.toInt()},${y2.toInt()})',
-    );
-
-    // Generate full mask
+    // Create mask by combining coefficients with prototypes
     List<List<double>> mask = List.generate(
       maskSize,
       (_) => List.filled(maskSize, 0.0),
     );
 
-    // Calculate mask values
     for (int y = 0; y < maskSize; y++) {
       for (int x = 0; x < maskSize; x++) {
         double sum = 0.0;
-        for (int c = 0; c < min(32, coeffs.length); c++) {
+        for (int c = 0; c < 32; c++) {
           sum += coeffs[c] * protos[y][x][c];
         }
-        mask[y][x] = 1.0 / (1.0 + exp(-sum)); // Sigmoid activation
+        mask[y][x] = 1.0 / (1.0 + exp(-sum)); // sigmoid
       }
     }
 
-    // Map bbox to mask coordinates with padding
+    // Map bbox to mask region
     int mx1 = ((x1 / imgW) * maskSize).round().clamp(0, maskSize - 1);
     int my1 = ((y1 / imgH) * maskSize).round().clamp(0, maskSize - 1);
     int mx2 = ((x2 / imgW) * maskSize).round().clamp(0, maskSize - 1);
     int my2 = ((y2 / imgH) * maskSize).round().clamp(0, maskSize - 1);
 
-    // Add padding to capture more of the mask
+    // Add padding
     mx1 = (mx1 - 5).clamp(0, maskSize - 1);
     my1 = (my1 - 5).clamp(0, maskSize - 1);
     mx2 = (mx2 + 5).clamp(0, maskSize - 1);
@@ -313,9 +270,7 @@ class TFLiteHelper {
     if (mx2 <= mx1) mx2 = min(mx1 + 1, maskSize - 1);
     if (my2 <= my1) my2 = min(my1 + 1, maskSize - 1);
 
-    print('   Mask region: ($mx1,$my1) to ($mx2,$my2)');
-
-    // Calculate adaptive threshold
+    // Calculate threshold
     double maxMask = 0.0;
     double avgMask = 0.0;
     int count = 0;
@@ -329,29 +284,18 @@ class TFLiteHelper {
     }
     avgMask = count > 0 ? avgMask / count : 0.0;
 
-    // Use lower threshold - either 30% of max or 0.3, whichever is lower
     double threshold = min(maxMask * 0.3, 0.3);
+    if (avgMask > 0.5) threshold = min(threshold, 0.2);
 
-    // If average is high, use even lower threshold
-    if (avgMask > 0.5) {
-      threshold = min(threshold, 0.2);
-    }
-
-    print(
-      '   Max: ${maxMask.toStringAsFixed(3)}, Avg: ${avgMask.toStringAsFixed(3)}',
-    );
-    print('   Threshold: ${threshold.toStringAsFixed(3)}');
-
-    // Find ALL pixels above threshold (not just edges)
+    // Find edge pixels
     List<Map<String, int>> maskPixels = [];
 
     for (int y = my1; y <= my2; y++) {
       for (int x = mx1; x <= mx2; x++) {
         if (mask[y][x] > threshold) {
-          // Check if this is an edge pixel
           bool isEdge = false;
 
-          // Check 8-connected neighbors
+          // Check neighbors
           for (int dy = -1; dy <= 1 && !isEdge; dy++) {
             for (int dx = -1; dx <= 1 && !isEdge; dx++) {
               if (dx == 0 && dy == 0) continue;
@@ -359,7 +303,6 @@ class TFLiteHelper {
               int ny = y + dy;
               int nx = x + dx;
 
-              // Edge if neighbor is outside bounds or below threshold
               if (ny < 0 ||
                   ny >= maskSize ||
                   nx < 0 ||
@@ -370,20 +313,13 @@ class TFLiteHelper {
             }
           }
 
-          if (isEdge) {
-            maskPixels.add({'x': x, 'y': y});
-          }
+          if (isEdge) maskPixels.add({'x': x, 'y': y});
         }
       }
     }
 
-    print('   Edge pixels found: ${maskPixels.length}');
-
-    // If we have too few edge pixels, use contour tracing
+    // Fallback if too few edge pixels
     if (maskPixels.length < 8) {
-      print('   ⚠️ Too few edge pixels, using filled region approach');
-
-      // Find all pixels above threshold
       List<Map<String, int>> allPixels = [];
       for (int y = my1; y <= my2; y++) {
         for (int x = mx1; x <= mx2; x++) {
@@ -394,16 +330,15 @@ class TFLiteHelper {
       }
 
       if (allPixels.isNotEmpty) {
-        // Get convex hull or boundary pixels
-        maskPixels = _extractBoundary(allPixels, mx1, my1, mx2, my2);
+        maskPixels = _extractBoundary(allPixels);
       }
     }
 
-    // Convert mask coordinates to image coordinates
+    // Convert to image coordinates
     List<Map<String, double>> polygon = [];
 
     if (maskPixels.length < 4) {
-      print('   ⚠️ Insufficient pixels, using bbox');
+      // Use bbox as fallback
       polygon = [
         {'x': x1, 'y': y1},
         {'x': x2, 'y': y1},
@@ -411,7 +346,6 @@ class TFLiteHelper {
         {'x': x1, 'y': y2},
       ];
     } else {
-      // Sort points to form proper polygon (clockwise)
       maskPixels = _sortPointsClockwise(maskPixels);
 
       for (var e in maskPixels) {
@@ -431,41 +365,30 @@ class TFLiteHelper {
       }
     }
 
-    print('   Final polygon: ${polygon.length} points');
     return polygon;
   }
 
-  // Helper: Extract boundary pixels from filled region
-  List<Map<String, int>> _extractBoundary(
-    List<Map<String, int>> pixels,
-    int minX,
-    int minY,
-    int maxX,
-    int maxY,
-  ) {
+  /// Find boundary pixels
+  List<Map<String, int>> _extractBoundary(List<Map<String, int>> pixels) {
     if (pixels.isEmpty) return [];
 
-    // Create a grid to mark filled pixels
     Set<String> pixelSet = {};
     for (var p in pixels) {
       pixelSet.add('${p['x']},${p['y']}');
     }
 
-    // Find boundary pixels
     List<Map<String, int>> boundary = [];
 
     for (var p in pixels) {
       int x = p['x']!;
       int y = p['y']!;
 
-      // Check if any neighbor is not filled
       bool isBoundary = false;
       for (int dy = -1; dy <= 1; dy++) {
         for (int dx = -1; dx <= 1; dx++) {
           if (dx == 0 && dy == 0) continue;
 
-          String neighborKey = '${x + dx},${y + dy}';
-          if (!pixelSet.contains(neighborKey)) {
+          if (!pixelSet.contains('${x + dx},${y + dy}')) {
             isBoundary = true;
             break;
           }
@@ -473,19 +396,17 @@ class TFLiteHelper {
         if (isBoundary) break;
       }
 
-      if (isBoundary) {
-        boundary.add({'x': x, 'y': y});
-      }
+      if (isBoundary) boundary.add({'x': x, 'y': y});
     }
 
     return boundary.isEmpty ? pixels : boundary;
   }
 
-  // Helper: Sort points clockwise to form proper polygon
+  /// Sort points clockwise
   List<Map<String, int>> _sortPointsClockwise(List<Map<String, int>> points) {
     if (points.length < 3) return points;
 
-    // Find centroid
+    // Find center
     double cx = 0, cy = 0;
     for (var p in points) {
       cx += p['x']!;
@@ -494,7 +415,7 @@ class TFLiteHelper {
     cx /= points.length;
     cy /= points.length;
 
-    // Sort by angle from centroid
+    // Sort by angle
     points.sort((a, b) {
       double angleA = atan2(a['y']! - cy, a['x']! - cx);
       double angleB = atan2(b['y']! - cy, b['x']! - cx);
@@ -504,6 +425,7 @@ class TFLiteHelper {
     return points;
   }
 
+  /// Calculate overlap between boxes
   double _calculateIoU(Map<String, dynamic> b1, Map<String, dynamic> b2) {
     final x1 = max(b1['x1'], b2['x1']);
     final y1 = max(b1['y1'], b2['y1']);

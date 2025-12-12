@@ -24,7 +24,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   bool _isLoading = false;
   bool _isModelLoaded = false;
-  String _analysisStatus = '';
 
   @override
   void initState() {
@@ -35,18 +34,14 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   Future<void> _loadModel() async {
     try {
-      setState(() => _analysisStatus = 'Loading AI model...');
       await _tfliteHelper.loadModel();
-
       if (_tfliteHelper.isLoaded && mounted) {
         setState(() {
           _isModelLoaded = true;
-          _analysisStatus = 'Model ready! Tap Analyze to detect urine sample.';
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _analysisStatus = 'Model load failed: ${e.toString()}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to load model: $e'),
@@ -73,36 +68,26 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     });
 
     try {
-      // Verify file exists
       if (!await _imageFile.exists()) {
         throw Exception('Image file not found!');
       }
 
-      setState(() => _analysisStatus = 'Running segmentation model...');
-
-      // Run model inference
       final modelOutput = await _tfliteHelper.runModel(_imageFile);
 
-      // Check if analysis succeeded
       if (modelOutput['success'] != true) {
         throw Exception(modelOutput['error'] ?? 'Analysis failed');
       }
 
-      // Extract detections
       final detections =
           modelOutput['detections'] as List<Map<String, dynamic>>;
       final inferenceTime = modelOutput['inferenceTime'] as int;
 
-      print('✅ Model detected ${detections.length} objects');
-
-      // Find best detection (highest confidence)
       if (detections.isEmpty) {
         throw Exception(
           'No urine sample detected in image. Please ensure the sample is clearly visible.',
         );
       }
 
-      // Sort by confidence
       detections.sort(
         (a, b) =>
             (b['confidence'] as double).compareTo(a['confidence'] as double),
@@ -113,16 +98,12 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       final confidenceValue = bestDetection['confidence'] as double;
       final confidence = confidenceValue.toStringAsFixed(2);
 
-      setState(() => _analysisStatus = 'Processing results...');
-
-      // Calculate probabilities for all classes
       Map<String, double> allProbs = {
         'Possible Dehydrated': 0.0,
         'Normal': 0.0,
         'Possible UTI': 0.0,
       };
 
-      // Aggregate confidences by class
       for (var detection in detections) {
         final className = detection['class'] as String;
         final conf = detection['confidence'] as double;
@@ -131,7 +112,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         }
       }
 
-      // Normalize to 100%
       final total = allProbs.values.reduce((a, b) => a + b);
       if (total > 0) {
         allProbs.forEach((key, value) {
@@ -139,9 +119,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         });
       }
 
-      setState(() => _analysisStatus = 'Uploading image...');
-
-      // Upload image to Supabase
       final fileName = 'urine_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final bucketName = 'urine_images';
 
@@ -155,15 +132,11 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
       final imageUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
 
-      setState(() => _analysisStatus = 'Saving to database...');
-
-      // Get current user
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('User not logged in');
       }
 
-      // Save to Firebase analysis_results
       await FirebaseFirestore.instance.collection('analysis_results').add({
         'userId': user.uid,
         'timestamp': Timestamp.now(),
@@ -181,7 +154,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         'polygonPoints': bestDetection['polygon']?.length ?? 0,
       });
 
-      // Map results to hydration and UTI risk
       String hydrationResult;
       String utiRisk;
 
@@ -192,11 +164,10 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         hydrationResult = 'Possible UTI';
         utiRisk = 'High';
       } else {
-        hydrationResult = 'normal';
+        hydrationResult = 'Normal';
         utiRisk = 'Low';
       }
 
-      // Save to history collection
       final historyRef = FirebaseFirestore.instance.collection('history');
       await historyRef.add({
         'userId': user.uid,
@@ -206,9 +177,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         'date': Timestamp.now(),
       });
 
-      setState(() => _analysisStatus = 'Complete! Navigating to results...');
-
-      // Navigate to results WITH detections
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -225,7 +193,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       }
     } catch (e) {
       setState(() {
-        _analysisStatus = 'Analysis failed: ${e.toString()}';
         _isLoading = false;
       });
 
@@ -298,7 +265,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Image Preview
             Center(
               child: Card(
                 elevation: 4,
@@ -366,67 +332,17 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
             const SizedBox(height: 16),
 
-            // Status Message
-            if (_analysisStatus.isNotEmpty)
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _isLoading
-                        ? Colors.orange.withOpacity(0.1)
-                        : Colors.teal.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: _isLoading ? Colors.orange : Colors.teal,
-                      width: 2,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_isLoading) ...[
-                        const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Flexible(
-                        child: Text(
-                          _analysisStatus,
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: _isLoading
-                                ? Colors.orange[800]
-                                : Colors.teal[800],
-                            fontWeight: FontWeight.w600,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            const SizedBox(height: 24),
-
-            // Info Card
             Card(
               color: Colors.blue.shade50,
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    Icon(Icons.lightbulb_outline, color: Colors.blue[700]),
+                    Icon(Icons.info_outline, color: Colors.blue[700]),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'The model will detect and segment the urine sample region using polygons for accurate analysis.',
+                        'This is a preliminary screening tool only and does not replace medical diagnosis. Seek immediate medical attention for abnormal results.',
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           color: Colors.blue[900],
@@ -440,7 +356,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
             const SizedBox(height: 24),
 
-            // Analyze Button
             Center(
               child: SizedBox(
                 width: 220,
@@ -488,7 +403,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
             const SizedBox(height: 16),
 
-            // Retake Button
             if (!_isLoading)
               Center(
                 child: TextButton.icon(

@@ -15,17 +15,14 @@ class CaptureScreen extends StatefulWidget {
 
 class _CaptureScreenState extends State<CaptureScreen> {
   int _selectedIndex = 2;
-  File? _image;
   final ImagePicker _picker = ImagePicker();
 
-  // Capture image from camera (NO blur detection)
+  // Capture image from camera
   Future<void> _captureImage() async {
     final XFile? captured = await _picker.pickImage(source: ImageSource.camera);
     if (captured == null) return;
 
     final File imageFile = File(captured.path);
-    setState(() => _image = imageFile);
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -34,14 +31,12 @@ class _CaptureScreenState extends State<CaptureScreen> {
     );
   }
 
-  // Upload image from gallery (NO blur detection)
+  // Upload image from gallery
   Future<void> _uploadImage() async {
     final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
 
     final File imageFile = File(picked.path);
-    setState(() => _image = imageFile);
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -89,8 +84,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final bool isWide = constraints.maxWidth > 800;
-          final double contentWidth =
-              isWide ? 500 : constraints.maxWidth * 0.85;
+          final double contentWidth = isWide
+              ? 500
+              : constraints.maxWidth * 0.85;
 
           return Center(
             child: SingleChildScrollView(
@@ -100,20 +96,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _image == null
-                        ? const Icon(
-                            Icons.camera_alt,
-                            size: 100,
-                            color: Colors.grey,
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              _image!,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                    const Icon(Icons.camera_alt, size: 100, color: Colors.grey),
                     const SizedBox(height: 20),
                     Text(
                       'Tap a button below to capture or upload an image of your urine sample.',
@@ -159,7 +142,8 @@ class _CaptureScreenState extends State<CaptureScreen> {
                                 foregroundColor: Colors.teal,
                                 side: const BorderSide(color: Colors.teal),
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 14),
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
