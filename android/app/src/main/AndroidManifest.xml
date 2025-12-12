@@ -1,13 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.urinalysis_app">
 
-    <!-- ✅ Add required permissions -->
+    <!-- Add required permissions -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:label="urinalysis_app"
+        android:label="Urinova_lysis"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         

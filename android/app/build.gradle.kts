@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.urinalysis_app"
+        applicationId = "com.example.Urinova_lysis"
         minSdk = flutter.minSdkVersion
         targetSdk = 34
         versionCode = 1
