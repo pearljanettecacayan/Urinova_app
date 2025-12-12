@@ -41,12 +41,12 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       if (_tfliteHelper.isLoaded && mounted) {
         setState(() {
           _isModelLoaded = true;
-          _analysisStatus = 'Tap Analyze to start.';
+          _analysisStatus = 'Model ready! Tap Analyze to detect urine sample.';
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _analysisStatus = 'Model load failed');
+        setState(() => _analysisStatus = 'Model load failed: ${e.toString()}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to load model: $e'),
@@ -68,7 +68,9 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       // Verify file exists
@@ -76,7 +78,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         throw Exception('Image file not found!');
       }
 
-      setState(() => _analysisStatus = 'Running AI analysis...');
+      setState(() => _analysisStatus = 'Running segmentation model...');
 
       // Run model inference
       final modelOutput = await _tfliteHelper.runModel(_imageFile);
@@ -91,12 +93,16 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           modelOutput['detections'] as List<Map<String, dynamic>>;
       final inferenceTime = modelOutput['inferenceTime'] as int;
 
+      print('✅ Model detected ${detections.length} objects');
+
       // Find best detection (highest confidence)
       if (detections.isEmpty) {
-        throw Exception('No objects detected in image');
+        throw Exception(
+          'No urine sample detected in image. Please ensure the sample is clearly visible.',
+        );
       }
 
-      // Get the detection with highest confidence
+      // Sort by confidence
       detections.sort(
         (a, b) =>
             (b['confidence'] as double).compareTo(a['confidence'] as double),
@@ -106,6 +112,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       final bestLabel = bestDetection['class'] as String;
       final confidenceValue = bestDetection['confidence'] as double;
       final confidence = confidenceValue.toStringAsFixed(2);
+
+      setState(() => _analysisStatus = 'Processing results...');
 
       // Calculate probabilities for all classes
       Map<String, double> allProbs = {
@@ -131,7 +139,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         });
       }
 
-      setState(() => _analysisStatus = 'Uploading results...');
+      setState(() => _analysisStatus = 'Uploading image...');
 
       // Upload image to Supabase
       final fileName = 'urine_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -147,7 +155,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
       final imageUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
 
-      setState(() => _analysisStatus = 'Saving Results...');
+      setState(() => _analysisStatus = 'Saving to database...');
 
       // Get current user
       final user = FirebaseAuth.instance.currentUser;
@@ -170,58 +178,54 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         'imageUrl': imageUrl,
         'detectionsCount': detections.length,
         'segmentationEnabled': true,
+        'polygonPoints': bestDetection['polygon']?.length ?? 0,
       });
+
+      // Map results to hydration and UTI risk
+      String hydrationResult;
+      String utiRisk;
+
+      if (bestLabel == 'possible dehydrated') {
+        hydrationResult = 'Possible Dehydrated';
+        utiRisk = 'Low';
+      } else if (bestLabel == 'possible uti') {
+        hydrationResult = 'Possible UTI';
+        utiRisk = 'High';
+      } else {
+        hydrationResult = 'normal';
+        utiRisk = 'Low';
+      }
 
       // Save to history collection
       final historyRef = FirebaseFirestore.instance.collection('history');
-      final existing = await historyRef
-          .where('userId', isEqualTo: user.uid)
-          .where('imageUrl', isEqualTo: imageUrl)
-          .get();
+      await historyRef.add({
+        'userId': user.uid,
+        'hydration': hydrationResult,
+        'utiRisk': utiRisk,
+        'imageUrl': imageUrl,
+        'date': Timestamp.now(),
+      });
 
-      if (existing.docs.isEmpty) {
-        // Map results to hydration and UTI risk
-        String hydrationResult;
-        String utiRisk;
+      setState(() => _analysisStatus = 'Complete! Navigating to results...');
 
-        if (bestLabel == 'Possible Dehydrated') {
-          hydrationResult = 'Possible Dehydrated';
-          utiRisk = 'Low';
-        } else if (bestLabel == 'Possible UTI') {
-          hydrationResult = 'Normal';
-          utiRisk = 'High';
-        } else {
-          hydrationResult = 'Normal';
-          utiRisk = 'Low';
-        }
-
-        await historyRef.add({
-          'userId': user.uid,
-          'hydration': hydrationResult,
-          'utiRisk': utiRisk,
-          'imageUrl': imageUrl,
-          'date': Timestamp.now(),
-        });
-      }
-
-      setState(() => _analysisStatus = 'Analysis complete!');
-
-      // Navigate to results
+      // Navigate to results WITH detections
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => ResultsScreen(
-              hydrationResult: bestLabel == 'Normal' ? 'Normal' : bestLabel,
-              utiRisk: bestLabel == 'Possible UTI' ? 'High' : 'Low',
+              hydrationResult: hydrationResult,
+              utiRisk: utiRisk,
               confidence: confidence,
+              imageFile: _imageFile,
+              detections: detections,
             ),
           ),
         );
       }
     } catch (e) {
       setState(() {
-        _analysisStatus = 'Analysis failed';
+        _analysisStatus = 'Analysis failed: ${e.toString()}';
         _isLoading = false;
       });
 
@@ -238,10 +242,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             ),
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
@@ -264,9 +264,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       case 2:
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/notifications');
-        break;
-      case 4:
         Navigator.pushReplacementNamed(context, '/profile');
         break;
     }
@@ -303,52 +300,67 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
             // Image Preview
             Center(
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      _imageFile,
-                      fit: BoxFit.contain,
-                      width: double.infinity,
-                    ),
-                  ),
-
-                  // Model Ready Badge
-                  if (_isModelLoaded)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                              size: 16,
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Stack(
+                    children: [
+                      Image.file(
+                        _imageFile,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                      ),
+                      if (_isModelLoaded && !_isLoading)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
                             ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Ready',
-                              style: TextStyle(
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Model Ready',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      if (_isLoading)
+                        Positioned.fill(
+                          child: Container(
+                            color: Colors.black.withOpacity(0.5),
+                            child: const Center(
+                              child: CircularProgressIndicator(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
 
@@ -360,30 +372,78 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 8,
+                    vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.teal.withOpacity(0.1),
+                    color: _isLoading
+                        ? Colors.orange.withOpacity(0.1)
+                        : Colors.teal.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _analysisStatus,
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.teal[800],
-                      fontWeight: FontWeight.w500,
+                    border: Border.all(
+                      color: _isLoading ? Colors.orange : Colors.teal,
+                      width: 2,
                     ),
-                    textAlign: TextAlign.center,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_isLoading) ...[
+                        const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Flexible(
+                        child: Text(
+                          _analysisStatus,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: _isLoading
+                                ? Colors.orange[800]
+                                : Colors.teal[800],
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
             const SizedBox(height: 24),
 
+            // Info Card
+            Card(
+              color: Colors.blue.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Icon(Icons.lightbulb_outline, color: Colors.blue[700]),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'The model will detect and segment the urine sample region using polygons for accurate analysis.',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: Colors.blue[900],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
             // Analyze Button
             Center(
               child: SizedBox(
-                width: 200,
+                width: 220,
                 child: ElevatedButton.icon(
                   onPressed: (!_isModelLoaded || _isLoading)
                       ? null
@@ -397,12 +457,17 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(Icons.analytics),
+                      : const Icon(Icons.analytics_outlined, size: 24),
                   label: Text(
                     _isLoading
                         ? "Analyzing..."
-                        : (_isModelLoaded ? "Analyze" : "Loading Model..."),
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                        : (_isModelLoaded
+                              ? "Analyze Sample"
+                              : "Loading Model..."),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
@@ -410,12 +475,32 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                     disabledBackgroundColor: Colors.grey,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
-                      vertical: 12,
+                      vertical: 16,
+                    ),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
               ),
             ),
+
+            const SizedBox(height: 16),
+
+            // Retake Button
+            if (!_isLoading)
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.camera_alt),
+                  label: Text(
+                    'Retake Photo',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
+                  style: TextButton.styleFrom(foregroundColor: Colors.teal),
+                ),
+              ),
 
             const SizedBox(height: 24),
           ],
