@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:label="Urinova_lysis"
+        android:label="urinovalysis_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
