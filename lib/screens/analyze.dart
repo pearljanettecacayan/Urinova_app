@@ -280,39 +280,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                         fit: BoxFit.contain,
                         width: double.infinity,
                       ),
-                      if (_isModelLoaded && !_isLoading)
-                        Positioned(
-                          top: 8,
-                          left: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Model Ready',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       if (_isLoading)
                         Positioned.fill(
                           child: Container(
@@ -376,9 +343,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   label: Text(
                     _isLoading
                         ? "Analyzing..."
-                        : (_isModelLoaded
-                              ? "Analyze Sample"
-                              : "Loading Model..."),
+                        : (_isModelLoaded ? "Analyze" : "Loading Model..."),
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
