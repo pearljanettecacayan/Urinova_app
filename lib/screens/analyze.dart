@@ -192,14 +192,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         );
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
+      setState(() => _isLoading = false);
+      
+      String message = 'Analysis failed. Please try again.';
+      
+      if (e.toString().contains('No urine sample')) {
+        message = 'No urine detected. Please retake photo.';
+      } else if (e.toString().contains('network')) {
+        message = 'Connection error. Check internet.';
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Analysis failed: ${e.toString()}'),
+            content: Text(message),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
