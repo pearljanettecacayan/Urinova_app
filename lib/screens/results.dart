@@ -86,7 +86,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            // Results header
             Text(
               'Your Results:',
               style: GoogleFonts.poppins(
@@ -97,7 +96,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
             const SizedBox(height: 15),
 
-            // Result cards
             _card(
               'Analysis Result',
               widget.hydrationResult,
@@ -115,7 +113,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Recommendation button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
