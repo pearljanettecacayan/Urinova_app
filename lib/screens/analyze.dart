@@ -45,7 +45,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to load model: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: const Color.fromARGB(255, 204, 30, 17),
           ),
         );
       }
@@ -206,7 +206,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
-            backgroundColor: const Color.fromARGB(255, 175, 20, 9),
+            backgroundColor: const Color.fromARGB(255, 204, 30, 17),
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: 'Retry',
