@@ -349,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Reusable Section
+  // Reusable Section
   Widget _buildSection({
     required String title,
     IconData? icon,

@@ -206,7 +206,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
-            backgroundColor: Colors.red,
+            backgroundColor: const Color.fromARGB(255, 121, 10, 2),
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: 'Retry',
