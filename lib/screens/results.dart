@@ -95,7 +95,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 color: Colors.teal[800],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
 
             // Result cards
             _card(

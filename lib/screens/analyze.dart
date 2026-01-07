@@ -9,7 +9,7 @@ import '../helpers/tflite_helper.dart';
 import 'results.dart';
 
 class AnalyzeScreen extends StatefulWidget {
-  final File imageFile; // from capture.dart
+  final File imageFile;
   const AnalyzeScreen({super.key, required this.imageFile});
 
   @override
@@ -193,20 +193,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      
+
       String message = 'Analysis failed. Please try again.';
-      
+
       if (e.toString().contains('No urine sample')) {
         message = 'No urine detected. Please retake photo.';
       } else if (e.toString().contains('network')) {
         message = 'Connection error. Check internet.';
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
-            backgroundColor: const Color.fromARGB(255, 121, 10, 2),
+            backgroundColor: const Color.fromARGB(255, 175, 20, 9),
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: 'Retry',
