@@ -9,7 +9,7 @@ import '../helpers/tflite_helper.dart';
 import 'results.dart';
 
 class AnalyzeScreen extends StatefulWidget {
-  final File imageFile;
+  final File imageFile; // from capture.dart
   const AnalyzeScreen({super.key, required this.imageFile});
 
   @override

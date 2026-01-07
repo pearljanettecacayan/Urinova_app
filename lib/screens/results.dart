@@ -260,9 +260,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   }
 }
 
-// ============================================
-// ENHANCED DEBUG PAINTER - DRAWS POLYGON LINES
-// ============================================
+// DRAWS POLYGON LINES
 class PolygonOnlyPainter extends CustomPainter {
   final ui.Image image;
   final List<Map<String, dynamic>> detections;
@@ -301,7 +299,7 @@ class PolygonOnlyPainter extends CustomPainter {
       offsetY = (size.height - image.height * scale) / 2;
     }
 
-    print('📐 Scale: $scale, Offset: ($offsetX, $offsetY)');
+    print(' Scale: $scale, Offset: ($offsetX, $offsetY)');
 
     // 3. Draw polygons with EXTENSIVE debugging
     for (int i = 0; i < detections.length; i++) {

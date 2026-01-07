@@ -15,7 +15,7 @@ class TFLiteHelper {
 
   bool get isLoaded => _interpreter != null;
 
-  /// Load model and labels from assets
+  /// Load tflite model and labels from assets
   Future loadModel() async {
     try {
       print('Loading model...');
@@ -44,12 +44,11 @@ class TFLiteHelper {
     }
   }
 
-  /// Run model on image, returns detections with masks
+  /// Run model
   Future<Map<String, dynamic>> runModel(File imageFile) async {
     if (_interpreter == null) {
       throw Exception('Model not loaded');
     }
-
     try {
       final rawBytes = await imageFile.readAsBytes();
       final image = img.decodeImage(rawBytes);
@@ -62,7 +61,7 @@ class TFLiteHelper {
       // Resize to 640x640 for model input
       final resized = img.copyResize(image, width: 640, height: 640);
 
-      // Prepare input: normalize pixels to 0-1
+      // normalize pixels to 0-1
       var input = List.generate(
         1,
         (_) => List.generate(
@@ -74,19 +73,22 @@ class TFLiteHelper {
         ),
       );
 
-      // Prepare outputs
-      // Output 0: [1, 39, 8400] - box coords + class scores + mask coeffs
+      // Prepare output0 & output1
       var output0 = List.generate(
         1,
-        (_) => List.generate(39, (_) => List.filled(8400, 0.0)),
+        (_) => List.generate(
+          39,
+          (_) => List.filled(8400, 0.0),
+        ), // bbox + classes + mask coeffs
       );
-
-      // Output 1: [1, 160, 160, 32] - mask prototypes
       var output1 = List.generate(
         1,
         (_) => List.generate(
           160,
-          (_) => List.generate(160, (_) => List.filled(32, 0.0)),
+          (_) => List.generate(
+            160,
+            (_) => List.filled(32, 0.0),
+          ), // mask prototypes
         ),
       );
 
@@ -99,13 +101,13 @@ class TFLiteHelper {
 
       print('Inference completed in ${inferenceTime}ms');
 
-      // Reshape for easier processing: [1, 39, 8400] → [39, 8400]
+      // Parse detection - Reshape for easier processing
       List<List<double>> transposedOutput = List.generate(
         39,
         (i) => List.generate(8400, (j) => output0[0][i][j]),
       );
 
-      // Parse and filter detections
+      // Parse detections and generate polygons
       final detections = _parseDetections(
         transposedOutput,
         output1[0],
@@ -129,8 +131,8 @@ class TFLiteHelper {
 
   /// Parse detections and apply NMS filtering
   List<Map<String, dynamic>> _parseDetections(
-    List<List<double>> detections,
-    List<List<List<double>>> maskProtos,
+    List<List<double>> detections, // from output 0
+    List<List<List<double>>> maskProtos, // from output 1
     int origWidth,
     int origHeight,
   ) {
@@ -138,13 +140,11 @@ class TFLiteHelper {
     print('Parsing ${detections[0].length} raw detections...');
 
     for (int i = 0; i < detections[0].length; i++) {
-      // Extract box: center x, center y, width, height (normalized 0-1)
-      double cx = detections[0][i];
-      double cy = detections[1][i];
-      double w = detections[2][i];
-      double h = detections[3][i];
+      double cx = detections[0][i]; // Center X
+      double cy = detections[1][i]; // Center Y
+      double w = detections[2][i]; // Width
+      double h = detections[3][i]; // Height
 
-      // Extract class scores
       List<double> scores = [
         detections[4][i],
         detections[5][i],
@@ -154,15 +154,12 @@ class TFLiteHelper {
       double maxScore = scores.reduce(max);
       int classIdx = scores.indexOf(maxScore);
 
-      // Keep only confident detections (>50%)
       if (maxScore > 0.5) {
-        // Extract 32 mask coefficients
         List<double> maskCoeffs = [];
         for (int j = 7; j < 39; j++) {
           maskCoeffs.add(detections[j][i]);
         }
-
-        // Convert to pixel coordinates
+        // Convert normalized coords - pixel coords
         double x1 = ((cx - w / 2) * origWidth).clamp(0.0, origWidth.toDouble());
         double y1 = ((cy - h / 2) * origHeight).clamp(
           0.0,
@@ -178,7 +175,7 @@ class TFLiteHelper {
             ? _labels[classIdx]
             : 'Unknown';
 
-        // Generate mask polygon
+        // Generate polygon mask
         final polygon = _generatePolygon(
           maskCoeffs,
           maskProtos,
@@ -189,7 +186,7 @@ class TFLiteHelper {
           origWidth,
           origHeight,
         );
-
+        // stored complete detection
         results.add({
           'bbox': {
             'x1': x1,
@@ -208,7 +205,7 @@ class TFLiteHelper {
       }
     }
 
-    // Remove overlapping detections (NMS)
+    // Apply NMS (remove duplicates)
     results.sort(
       (a, b) =>
           (b['confidence'] as double).compareTo(a['confidence'] as double),
@@ -216,7 +213,7 @@ class TFLiteHelper {
     List<Map<String, dynamic>> kept = [];
 
     while (results.isNotEmpty) {
-      kept.add(results.removeAt(0));
+      kept.add(results.removeAt(0)); // Keep best one
       results.removeWhere((det) {
         final iou = _calculateIoU(kept.last['bbox'], det['bbox']);
         return iou > 0.4 && kept.last['class'] == det['class'];
@@ -251,7 +248,7 @@ class TFLiteHelper {
         for (int c = 0; c < 32; c++) {
           sum += coeffs[c] * protos[y][x][c];
         }
-        mask[y][x] = 1.0 / (1.0 + exp(-sum)); // sigmoid
+        mask[y][x] = 1.0 / (1.0 + exp(-sum));
       }
     }
 
@@ -261,41 +258,27 @@ class TFLiteHelper {
     int mx2 = ((x2 / imgW) * maskSize).round().clamp(0, maskSize - 1);
     int my2 = ((y2 / imgH) * maskSize).round().clamp(0, maskSize - 1);
 
-    // Add padding
-    mx1 = (mx1 - 5).clamp(0, maskSize - 1);
-    my1 = (my1 - 5).clamp(0, maskSize - 1);
-    mx2 = (mx2 + 5).clamp(0, maskSize - 1);
-    my2 = (my2 + 5).clamp(0, maskSize - 1);
-
     if (mx2 <= mx1) mx2 = min(mx1 + 1, maskSize - 1);
     if (my2 <= my1) my2 = min(my1 + 1, maskSize - 1);
 
     // Calculate threshold
     double maxMask = 0.0;
-    double avgMask = 0.0;
-    int count = 0;
-
     for (int y = my1; y <= my2; y++) {
       for (int x = mx1; x <= mx2; x++) {
         maxMask = max(maxMask, mask[y][x]);
-        avgMask += mask[y][x];
-        count++;
       }
     }
-    avgMask = count > 0 ? avgMask / count : 0.0;
 
-    double threshold = min(maxMask * 0.3, 0.3);
-    if (avgMask > 0.5) threshold = min(threshold, 0.2);
+    double threshold = max(0.5, maxMask * 0.5);
 
     // Find edge pixels
-    List<Map<String, int>> maskPixels = [];
+    List<Map<String, int>> edges = [];
 
     for (int y = my1; y <= my2; y++) {
       for (int x = mx1; x <= mx2; x++) {
         if (mask[y][x] > threshold) {
           bool isEdge = false;
 
-          // Check neighbors
           for (int dy = -1; dy <= 1 && !isEdge; dy++) {
             for (int dx = -1; dx <= 1 && !isEdge; dx++) {
               if (dx == 0 && dy == 0) continue;
@@ -303,42 +286,25 @@ class TFLiteHelper {
               int ny = y + dy;
               int nx = x + dx;
 
-              if (ny < 0 ||
-                  ny >= maskSize ||
-                  nx < 0 ||
-                  nx >= maskSize ||
+              if (ny < my1 ||
+                  ny > my2 ||
+                  nx < mx1 ||
+                  nx > mx2 ||
                   mask[ny][nx] <= threshold) {
                 isEdge = true;
               }
             }
           }
 
-          if (isEdge) maskPixels.add({'x': x, 'y': y});
+          if (isEdge) edges.add({'x': x, 'y': y});
         }
-      }
-    }
-
-    // Fallback if too few edge pixels
-    if (maskPixels.length < 8) {
-      List<Map<String, int>> allPixels = [];
-      for (int y = my1; y <= my2; y++) {
-        for (int x = mx1; x <= mx2; x++) {
-          if (mask[y][x] > threshold) {
-            allPixels.add({'x': x, 'y': y});
-          }
-        }
-      }
-
-      if (allPixels.isNotEmpty) {
-        maskPixels = _extractBoundary(allPixels);
       }
     }
 
     // Convert to image coordinates
     List<Map<String, double>> polygon = [];
 
-    if (maskPixels.length < 4) {
-      // Use bbox as fallback
+    if (edges.length < 4) {
       polygon = [
         {'x': x1, 'y': y1},
         {'x': x2, 'y': y1},
@@ -346,15 +312,14 @@ class TFLiteHelper {
         {'x': x1, 'y': y2},
       ];
     } else {
-      maskPixels = _sortPointsClockwise(maskPixels);
+      edges = _sortPointsClockwise(edges);
 
-      for (var e in maskPixels) {
+      for (var e in edges) {
         double px = ((e['x']! / maskSize) * imgW).clamp(0.0, imgW.toDouble());
         double py = ((e['y']! / maskSize) * imgH).clamp(0.0, imgH.toDouble());
         polygon.add({'x': px, 'y': py});
       }
 
-      // Simplify if too many points
       if (polygon.length > 100) {
         int step = (polygon.length / 100).ceil();
         List<Map<String, double>> simplified = [];
@@ -368,45 +333,10 @@ class TFLiteHelper {
     return polygon;
   }
 
-  /// Find boundary pixels
-  List<Map<String, int>> _extractBoundary(List<Map<String, int>> pixels) {
-    if (pixels.isEmpty) return [];
-
-    Set<String> pixelSet = {};
-    for (var p in pixels) {
-      pixelSet.add('${p['x']},${p['y']}');
-    }
-
-    List<Map<String, int>> boundary = [];
-
-    for (var p in pixels) {
-      int x = p['x']!;
-      int y = p['y']!;
-
-      bool isBoundary = false;
-      for (int dy = -1; dy <= 1; dy++) {
-        for (int dx = -1; dx <= 1; dx++) {
-          if (dx == 0 && dy == 0) continue;
-
-          if (!pixelSet.contains('${x + dx},${y + dy}')) {
-            isBoundary = true;
-            break;
-          }
-        }
-        if (isBoundary) break;
-      }
-
-      if (isBoundary) boundary.add({'x': x, 'y': y});
-    }
-
-    return boundary.isEmpty ? pixels : boundary;
-  }
-
   /// Sort points clockwise
   List<Map<String, int>> _sortPointsClockwise(List<Map<String, int>> points) {
     if (points.length < 3) return points;
 
-    // Find center
     double cx = 0, cy = 0;
     for (var p in points) {
       cx += p['x']!;
@@ -415,7 +345,6 @@ class TFLiteHelper {
     cx /= points.length;
     cy /= points.length;
 
-    // Sort by angle
     points.sort((a, b) {
       double angleA = atan2(a['y']! - cy, a['x']! - cx);
       double angleB = atan2(b['y']! - cy, b['x']! - cx);
