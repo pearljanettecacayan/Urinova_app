@@ -12,18 +12,16 @@ class InstructionsScreen extends StatefulWidget {
 
 class _InstructionsScreenState extends State<InstructionsScreen> {
   final List<String> steps = [
-    'Prepare a clean, transparent container shown above.',
-    'Collect a fresh midstream urine sample (discard the first portion, collect the middle stream).',
-    'Fill the container to about half-full, then securely close with the cap.',
-    'Place the container on a flat, clean surface with a neutral background (white, light gray, or beige).',
-    'Use natural daylight or bright light. Avoid direct sunlight, shadows, or colored/yellow lighting.',
-    'Hold your phone about 15-20cm (one hand-span) away so the whole container is visible on your screen.',
-    'Ensure the camera is steady - rest your elbows on the table or use a phone stand if available.',
-    'The urine color should be clearly visible through the transparent container.',
-    'Take the photo when the image well-focused.',
-    'Review the captured image - the container should be centered',
-    'make sure its clear and the urine color is visible.',
-    'If the image is blurry, too dark, or has strong shadows, retake the photo.',
+ 'Prepare a clean, transparent container.',
+'Collect a fresh midstream urine sample.',
+'Fill the container to about half-full and close securely.',
+'Place on a flat surface with a white clean background.',
+'Use natural or bright light. Avoid direct sunlight and shadows.',
+'Hold your phone 15-20cm away so the container is fully visible.',
+'Keep the camera steady - rest your elbows or use a phone stand.',
+'Ensure the urine color is clearly visible through the container.',
+'Take the photo when well-focused and centered.',
+'Review - if blurry, too dark, or shadowy, retake the photo.',
   ];
 
   int _selectedIndex = 1;
