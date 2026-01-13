@@ -33,7 +33,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   @override
   void initState() {
     super.initState();
-    _addNotification();
+    _addNotification(); // Alert user of new result
   }
 
   Future<void> _addNotification() async {
@@ -68,6 +68,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     }
   }
 
+  // Display Result Cards
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,7 +96,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               ),
             ),
             const SizedBox(height: 15),
-
+            // Hydration Result
             _card(
               'Analysis Result',
               widget.hydrationResult,
@@ -104,6 +105,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               Colors.teal,
             ),
             const SizedBox(height: 16),
+            // UTI Risk
             _card(
               'UTI Risk',
               widget.utiRisk,
@@ -112,7 +114,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               Colors.green,
             ),
             const SizedBox(height: 24),
-
+            // Navigation to Recommendations
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

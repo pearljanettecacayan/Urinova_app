@@ -28,8 +28,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   @override
   void initState() {
     super.initState();
-    _imageFile = widget.imageFile;
-    _loadModel();
+    _imageFile = widget.imageFile; // Get image from capture screen
+    _loadModel(); // Load AI model
   }
 
   Future<void> _loadModel() async {
@@ -37,7 +37,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       await _tfliteHelper.loadModel();
       if (_tfliteHelper.isLoaded && mounted) {
         setState(() {
-          _isModelLoaded = true;
+          _isModelLoaded = true; // Enable "Analyze" button
         });
       }
     } catch (e) {
@@ -53,6 +53,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   }
 
   Future<void> _analyzeImage() async {
+    // Check if model is ready
     if (!_isModelLoaded) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -68,10 +69,11 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     });
 
     try {
+      // Verify image file exists
       if (!await _imageFile.exists()) {
         throw Exception('Image file not found!');
       }
-
+      // Run AI Model
       final modelOutput = await _tfliteHelper.runModel(_imageFile);
 
       if (modelOutput['success'] != true) {
@@ -81,23 +83,23 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       final detections =
           modelOutput['detections'] as List<Map<String, dynamic>>;
       final inferenceTime = modelOutput['inferenceTime'] as int;
-
+      // Validate Detections
       if (detections.isEmpty) {
         throw Exception(
           'No urine sample detected in image. Please ensure the sample is clearly visible.',
         );
       }
-
+      // Sort by confidence (highest first)
       detections.sort(
         (a, b) =>
             (b['confidence'] as double).compareTo(a['confidence'] as double),
       );
-
+      // Get best detection
       final bestDetection = detections.first;
       final bestLabel = bestDetection['class'] as String;
       final confidenceValue = bestDetection['confidence'] as double;
       final confidence = confidenceValue.toStringAsFixed(2);
-
+      // Calculate Class Probabilities
       Map<String, double> allProbs = {
         'Possible Dehydrated': 0.0,
         'Normal': 0.0,
@@ -118,7 +120,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           allProbs[key] = (value / total) * 100;
         });
       }
-
+      // Upload Image to Supabase
       final fileName = 'urine_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final bucketName = 'urine_images';
 
@@ -131,7 +133,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           );
 
       final imageUrl = supabase.storage.from(bucketName).getPublicUrl(fileName);
-
+      // Save to Firestore
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('User not logged in');
@@ -151,7 +153,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         'imageUrl': imageUrl,
         'detectionsCount': detections.length,
         'segmentationEnabled': true,
-        'polygonPoints': bestDetection['polygon']?.length ?? 0,
       });
 
       String hydrationResult;
@@ -167,7 +168,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         hydrationResult = 'Normal';
         utiRisk = 'Low';
       }
-
+      // Save to History
       final historyRef = FirebaseFirestore.instance.collection('history');
       await historyRef.add({
         'userId': user.uid,
@@ -176,7 +177,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         'imageUrl': imageUrl,
         'date': Timestamp.now(),
       });
-
+      // Navigate to Results
       if (mounted) {
         Navigator.pushReplacement(
           context,
