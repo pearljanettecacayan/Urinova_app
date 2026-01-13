@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
-/// Handles YOLO11m-seg model for urine analysis
+/// Handles YOLO11
 class TFLiteHelper {
   static final TFLiteHelper _instance = TFLiteHelper._internal();
   factory TFLiteHelper() => _instance;
@@ -44,7 +44,7 @@ class TFLiteHelper {
     }
   }
 
-  /// Run model
+  /// Image Preprocessing
   Future<Map<String, dynamic>> runModel(File imageFile) async {
     if (_interpreter == null) {
       throw Exception('Model not loaded');
@@ -53,7 +53,7 @@ class TFLiteHelper {
       final rawBytes = await imageFile.readAsBytes();
       final image = img.decodeImage(rawBytes);
       if (image == null) throw Exception("Invalid image");
-
+      // store original dimensions
       final origWidth = image.width;
       final origHeight = image.height;
       print('Original image: ${origWidth}x$origHeight');
