@@ -208,7 +208,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           SnackBar(
             content: Text(message),
             backgroundColor: const Color.fromARGB(255, 204, 30, 17),
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 3),
             action: SnackBarAction(
               label: 'Retry',
               textColor: Colors.white,
